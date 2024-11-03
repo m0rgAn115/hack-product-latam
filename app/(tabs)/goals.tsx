@@ -57,6 +57,8 @@ export default function TabTwoScreen() {
     router.push(`/goal-details?text=${texto}`); // Asegúrate de que la ruta coincida con el nombre del archivo
   };
 
+  
+
   return (
     <SafeAreaView>
       <ScrollView style={{ paddingHorizontal: 20 }} >
