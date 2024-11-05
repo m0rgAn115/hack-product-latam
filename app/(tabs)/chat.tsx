@@ -2,11 +2,21 @@ import { Image, StyleSheet, Platform, Pressable, Text, TextInput, View, ScrollVi
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import ExpensesPerMonth from '../../components/Expenses/ExpensesPerMonth'; // Importa los datos
+import { Transaction } from '@/components/Interfaces/transaction.interface';
+import { RenderGraphic } from '@/components/chat/RenderGraphic';
+import GraphPerMonth from '@/components/Expenses/GraphPerMonth';
+
 
 interface Conversation {
   rol: string;
   text: string;
   msg_number: number;
+  chart?: {
+    show: boolean,
+    transactions: Transaction[],
+    chart_type: 'barras' | 'lineas' | 'pay'
+  }
 }
 
 interface Goal_details {
@@ -15,6 +25,11 @@ interface Goal_details {
   initial: number;
   amount: number;
   plazo: number;
+}
+
+interface gastos_llm {
+  categoria: string,
+
 }
 
 const server = 'http://192.168.0.80:5001'
@@ -40,6 +55,18 @@ export default function ChatScreen() {
     plazo: 0, 
     title: '',
   })
+
+
+  const monthlyExpenses = ExpensesPerMonth[9] || [];
+
+  // Calcula el total de gastos del mes
+  const totalExpenses = monthlyExpenses.reduce((sumCategory, category) => {
+    const totalCategory = category.transacciones.reduce((sumTransaction, transaction) => {
+      return sumTransaction + transaction.monto;
+    }, 0);
+    return sumCategory + totalCategory;
+  }, 0);
+  const transactions = monthlyExpenses.flatMap(category => category.transacciones);
 
   
 
@@ -117,11 +144,30 @@ export default function ChatScreen() {
   };
 
   const fetchDataChat = async () => {
+    console.log('chat');
+    const conversation_filter = conversation.map(({ rol, text, msg_number }) => ({
+      rol,
+      text,
+      msg_number
+    })) 
+    console.log("filter: ",JSON.stringify({ text: inputValue, previous_chats: conversation.map(({ rol, text, msg_number }) => ({
+      rol,
+      text,
+      msg_number
+    })) 
+  }));
+    
+    
     try {
       const response = await fetch(`${server}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputValue, previous_chats: conversation }),
+        body: JSON.stringify({ text: inputValue, previous_chats: conversation.map(({ rol, text, msg_number }) => ({
+          rol,
+          text,
+          msg_number
+        })) 
+      }),
       });
       if (!response.ok) throw new Error('Error en la solicitud');
       const data = await response.json();
@@ -137,7 +183,7 @@ export default function ChatScreen() {
       if (funcion === "consultar_gastos"){
         const response = await  fetchDataAnalisis();
         console.log("response:", response);
-        return response.mensajeAsistente
+        return undefined
       }
       
       return data.response.message;
@@ -156,8 +202,27 @@ export default function ChatScreen() {
       });
       if (!response.ok) throw new Error('Error en la solicitud');
       const data = await response.json();
+      console.log(data);
+
+      const transacciones_filtradas = transactions
+
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: data.response.mensajeAsistente },
+      ]);
+
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: '',
+          chart: {
+            show: true,
+            transactions: transacciones_filtradas,
+            chart_type: data.response.tipoGrafica
+          }
+         },
+      ]);
       
-      return data.response;
+      return undefined;
     } catch (error) {
       console.error('Error:', error);
       return "Lo siento, hubo un error en la conversación.";
@@ -192,10 +257,11 @@ export default function ChatScreen() {
     const agentFunction = getAgentFunction();
     const response = await agentFunction();
     
-    setConversation(prev => [
-      ...prev,
-      { rol: 'assistant', msg_number: prev.length, text: response },
-    ]);
+    if(response!= undefined)
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: response },
+      ]);
     
     setInputValue('');
     setAssistantResponseState(false);
@@ -235,7 +301,15 @@ export default function ChatScreen() {
         <FlatList 
           ref={flatListRef}
           data={conversation}
-          renderItem={({ item }) => <ChatItem item={item} assistant_response_state={assistant_response_state} last_msg_index={conversation.length-1} info_completed_state={information_completed} onPress={handleGoalCompleted} />}
+          renderItem={({ item }) => <ChatItem item={item}
+                                             assistant_response_state={assistant_response_state} 
+                                            last_msg_index={conversation.length-1} 
+                                            info_completed_state={information_completed} 
+                                            onPress={handleGoalCompleted} 
+                                             showChart
+                                             transactions={transactions}
+                                             
+                                            />}
           keyExtractor={(item) => item.msg_number.toString()}
           style={{ backgroundColor: '#ececec', padding: 20, borderRadius: 10, height: '60%' }}
         />
@@ -250,6 +324,7 @@ export default function ChatScreen() {
             style={{ fontSize: 20 }}
             onFocus={() => console.log("Input focused")}
             onPressOut={handleInputValue}
+
           />
         )}
         <View style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }}>
@@ -281,38 +356,55 @@ interface ChatItemProps {
   last_msg_index: number;
   info_completed_state: boolean;
   onPress: () => void;
+  transactions: Transaction[]
+  showChart: boolean;
 }
 
-const ChatItem = ({ item, assistant_response_state, last_msg_index, info_completed_state, onPress }: ChatItemProps) => {
-  
-
+const ChatItem = ({ item, assistant_response_state, last_msg_index, info_completed_state, onPress, transactions }: ChatItemProps) => {
   return (
-    <View style={{ marginBottom: (item.msg_number === last_msg_index ) ? 40 : 20 }}>
-      <Text style={{
-        alignSelf: item.rol === 'user' ? 'flex-end' : 'flex-start',
-        backgroundColor: item.rol === 'user' ? 'white' : '#d3ebfe',
-        paddingHorizontal: 8,
-        paddingVertical: 5,
-        fontSize: 16,
-        borderRadius: 10
-      }}>
-        {item.text}
-      </Text>
-      {assistant_response_state && item.msg_number === last_msg_index && (
-        <Text style={{ color: 'blue', fontSize: 12, marginBottom: 10 }}>Assistant is typing...</Text>
-      )}
+    !item.chart?.show ? (
+      <View style={{ marginBottom: item.msg_number === last_msg_index ? 40 : (item.rol === 'user') ? 20 : 0, marginTop: ((item.rol === 'user')) ? 10 : 0 }}>
+        <Text
+          style={{
+            alignSelf: item.rol === 'user' ? 'flex-end' : 'flex-start',
+            backgroundColor: item.rol === 'user' ? 'white' : '#d3ebfe',
+            paddingHorizontal: 8,
+            paddingVertical: 5,
+            fontSize: 16,
+            borderRadius: 10,
+          }}
+        >
+          {item.text}
+        </Text>
 
-      {
-        info_completed_state && item.msg_number === last_msg_index && 
+        {assistant_response_state && item.msg_number === last_msg_index && (
+          <Text style={{ color: 'blue', fontSize: 12, marginBottom: 0 }}>Assistant is typing...</Text>
+        )}
+
+        {info_completed_state && item.msg_number === last_msg_index && (
           <Pressable
             onPress={onPress}
-            style={{ backgroundColor: '#3a9343', width: '80%', borderRadius: 10, padding: 10, alignSelf: 'center', marginTop: 15 }} >
-            <Text style={{ fontSize: 16, color: 'white', textAlign: 'center' }} >Create Goal</Text>
+            style={{
+              backgroundColor: '#3a9343',
+              width: '80%',
+              borderRadius: 10,
+              padding: 10,
+              alignSelf: 'center',
+              marginTop: 15,
+            }}
+          >
+            <Text style={{ fontSize: 16, color: 'white', textAlign: 'center' }}>Create Goal</Text>
           </Pressable>
-      }
-    </View>
+        )}
+      </View>
+    ) : (
+      <View style={{ marginBottom: (item.msg_number === last_msg_index ) ? 40 : 10, marginTop: 0}} >
+        <RenderGraphic transactions={item.chart.transactions} tipo={item.chart.chart_type} />
+      </View>
+    )
   );
 };
+
 
 const styles = StyleSheet.create({
   titleContainer: {
