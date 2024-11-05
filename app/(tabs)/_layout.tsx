@@ -24,12 +24,11 @@ export default function TabLayout() {
         }}
       />
        <Tabs.Screen
-        name="goals"
+        name="expenses"
         options={{
-          title: 'Goals',
+          title: 'Gastos',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'flag' : 'flag-outline'} color={color} />
-          ),
+            <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />          ),
         }}
       />
       <Tabs.Screen
