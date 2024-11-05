@@ -17,6 +17,8 @@ interface Goal_details {
   plazo: number;
 }
 
+const server = 'http://192.168.0.80:5001'
+
 export default function ChatScreen() {
   const router = useRouter();
   const textInputRef = useRef<TextInput>(null);
@@ -48,7 +50,7 @@ export default function ChatScreen() {
 
   const fetchDataMaster = async () => {
     try {
-      const response = await fetch('http://192.168.0.80:5001/master', {
+      const response = await fetch(`http://192.168.0.80:5001/master`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue }),
@@ -75,7 +77,7 @@ export default function ChatScreen() {
     console.log("Agente Goalme");
 
     try {
-      const response = await fetch('http://192.168.0.80:5001/goal', {
+      const response = await fetch(`${server}/goal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue, previous_chats: conversation }),
@@ -105,7 +107,8 @@ export default function ChatScreen() {
         })
         console.log("validado");
       }
-
+      
+      
       return (assistant_messages) ? assistant_messages[0] : [];
     } catch (error) {
       console.error('Error:', error);
@@ -115,7 +118,7 @@ export default function ChatScreen() {
 
   const fetchDataChat = async () => {
     try {
-      const response = await fetch('http://192.168.0.80:5001/chat', {
+      const response = await fetch(`${server}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue, previous_chats: conversation }),
@@ -125,13 +128,36 @@ export default function ChatScreen() {
       const assistant_message = data.response.message;
       const funcion = data.response.funcion;
       setInputValue('');
-      console.log(assistant_message);
+      console.log(funcion);
       
       if (funcion === "crear_meta_financiera") {
         setCurrentAgent('goal')
       }
+
+      if (funcion === "consultar_gastos"){
+        const response = await  fetchDataAnalisis();
+        console.log("response:", response);
+        return response.mensajeAsistente
+      }
       
       return data.response.message;
+    } catch (error) {
+      console.error('Error:', error);
+      return "Lo siento, hubo un error en la conversación.";
+    }
+  };
+
+  const fetchDataAnalisis = async () => {
+    try {
+      const response = await fetch(`${server}/analityc`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputValue, previous_chats: conversation }),
+      });
+      if (!response.ok) throw new Error('Error en la solicitud');
+      const data = await response.json();
+      
+      return data.response;
     } catch (error) {
       console.error('Error:', error);
       return "Lo siento, hubo un error en la conversación.";
@@ -175,7 +201,6 @@ export default function ChatScreen() {
     setAssistantResponseState(false);
     // console.log(conversation);
     
-
     // Solo después de completar la respuesta, actualizamos el agente si hay uno pendiente
     if (nextAgent) {
       setCurrentAgent(nextAgent);
