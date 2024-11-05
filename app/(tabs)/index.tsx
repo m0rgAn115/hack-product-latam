@@ -1,11 +1,28 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Pressable, Text } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeScreen() {
+
+  async function getToken() {
+    try {
+      const sesion_token = await AsyncStorage.getItem('session_token');
+      const refresh_token = await AsyncStorage.getItem('refresh_token');
+      const token_type = await AsyncStorage.getItem('token_type');
+      console.log(sesion_token, refresh_token, token_type)
+    } catch (error) {
+      console.error('Error al recuperar el token:', error);
+    }
+  }
+
+  const handleRecuperarToken = () => {
+    // getSessionToken().then(t => console.log('token:', t))
+  }
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -46,6 +63,22 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
+
+      <Pressable
+        style={({ pressed }) => [
+          {
+            backgroundColor: '#0a77c5',
+            paddingVertical: 5,
+            marginTop: 10,
+            width: '50%',
+            alignSelf: 'center', // Center the button
+          },
+          { opacity: pressed ? 0.8 : 1 },
+        ]}
+        onPress={getToken}
+      >
+        <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: '600', color: 'white' }}>Login</Text>
+      </Pressable>
     </ParallaxScrollView>
   );
 }
