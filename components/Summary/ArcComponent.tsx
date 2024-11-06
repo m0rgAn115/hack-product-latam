@@ -1,6 +1,6 @@
 // ArcComponent.tsx
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SegmentedArc } from '@shipt/segmented-arc-for-react-native';
 
 interface ArcComponentProps {
@@ -12,14 +12,13 @@ interface ArcComponentProps {
 }
 
 interface MetaData {
-    lastFilledSegment: {
-      data: {
-        label: string;
-      };
+  lastFilledSegment: {
+    data: {
+      label: string;
     };
-    fillValue: number;
+  };
+  fillValue: number;
 }
-
 
 const ArcComponent: React.FC<ArcComponentProps> = ({
   segments,
@@ -28,10 +27,13 @@ const ArcComponent: React.FC<ArcComponentProps> = ({
   newPoints,
   radius,
 }) => {
+  const formattedFillValue = Math.round(fillValue);
+  const pointsText = newPoints !== 0 ? `${newPoints > 0 ? '+' : ''}${newPoints} puntos` : '';
+  
   return (
     <SegmentedArc
       segments={segments}
-      fillValue={Math.round(fillValue)}
+      fillValue={formattedFillValue}
       isAnimated
       animationDelay={800}
       showArcRanges={false}
@@ -41,24 +43,45 @@ const ArcComponent: React.FC<ArcComponentProps> = ({
       capInnerColor="#856FE5"
     >
       {(metaData: MetaData) => (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 14, fontFamily: 'DMSans_400Regular', color: '#67677A' }}>
+        <View style={styles.centeredContainer}>
+          <Text style={styles.segmentLabel}>
             {metaData.lastFilledSegment.data.label}
           </Text>
-          <Text style={{ fontSize: 48, fontFamily: 'DMSans_700Bold' }}>
+          <Text style={styles.points}>
             {points}
           </Text>
-          <Text style={{ fontSize: 14, fontFamily: 'DMSans_400Regular', color: '#6347EB' }}>
-            {newPoints > 0
-              ? `+${newPoints} puntos`
-              : newPoints < 0
-              ? `-${newPoints} puntos`
-              : ''}
-          </Text>
+          {pointsText && (
+            <Text style={styles.newPoints}>
+              {pointsText}
+            </Text>
+          )}
         </View>
       )}
     </SegmentedArc>
   );
 };
+
+const styles = StyleSheet.create({
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  segmentLabel: {
+    fontSize: 16,
+    fontFamily: 'DMSans_400Regular',
+    color: '#67677A',
+    opacity: 0.8,
+  },
+  points: {
+    fontSize: 48,
+    fontFamily: 'DMSans_700Bold',
+  },
+  newPoints: {
+    fontSize: 14,
+    fontFamily: 'DMSans_400Regular',
+    color: '#6347EB',
+  },
+});
 
 export default ArcComponent;
