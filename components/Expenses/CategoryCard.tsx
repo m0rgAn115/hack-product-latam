@@ -1,123 +1,139 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { Category_Transactions } from '../Interfaces/transaction.interface';
-import { Icons } from './iconsConfig';
-import { iconColors } from './iconsConfig';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface ComponentProps {
-    category: Category_Transactions['category'];
-    transacciones: Category_Transactions['transacciones'];
+  category: string;
+  transactions: Array<{
+    name: string;
+    amount: number;
+    date: string;
+    logo_url?: string;
+    merchant_name?: string;
+  }>; 
+  onPress: () => void;
+  color: string; // Color específico para la categoría
 }
 
-const CategoryCard = ({ category, transacciones }: ComponentProps) => {
-    const totalCategory = transacciones.reduce((sum, t) => sum + t.monto, 0);
+export const categoryColors = {
+  "Food and Drink": "#FF7A61",
+  Entertainment: "#61A7FF",
+  Shopping: "#FFA761",
+  Utilities: "#61FFA7",
+};
 
-    return (
+const CategoryCard = ({ category, transactions, onPress, color }: ComponentProps) => {
+  const totalCategory = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+  return (
+    <GestureHandlerRootView>
+      <TouchableOpacity onPress={onPress}>
         <View style={styles.categoryContainer}>
           <View style={styles.header}>
-            <View>
-                  {Icons[category.icon].iconName}
-            </View>
-            <Text style={styles.categoryTitle}>{category.name}</Text>
-            <Text style={styles.categoryTotal}>${totalCategory}</Text>
+            <View style={[styles.icon, { backgroundColor: color }]} />
+            <Text style={styles.categoryTitle}>{category}</Text>
+            <Text style={styles.categoryTotal}>${totalCategory.toFixed(2)}</Text>
           </View>
-            <FlatList
-                data={transacciones}
-                keyExtractor={(transaction) => transaction.titulo}
-                renderItem={({item}) => {
-                  const porcentaje = (item.monto / totalCategory) * 100;
-                  return (
-                    <View style={styles.transactionContainer}>
-                      <View style={styles.transactionDetails}>
-                        <Text style={styles.transactionTitle}>{item.titulo}</Text>
-                        <Text style={styles.transactionAmount}>${item.monto}</Text>
-                      </View>
-                      <View style={styles.progressBarContainer}>
-                        <View style={styles.progressBarBackground}>
-                          <View style={[styles.progressBar, { width: `${porcentaje}%`, backgroundColor:iconColors[category.icon]  }]} />
-                        </View>
-                        <Text style={styles.transactionDate}>{item.fecha}</Text>
-                      </View>
+          <FlatList
+            data={transactions.slice(0, 2)} // Limitar a las primeras 2 transacciones
+            keyExtractor={(transaction, index) => `${transaction.name}-${transaction.date}-${index}`}
+            renderItem={({ item }) => {
+              const percentage = (Math.abs(item.amount) / totalCategory) * 100;
+              return (
+                <View style={styles.transactionContainer}>
+                  <View style={styles.transactionDetails}>
+                    <Text style={styles.transactionTitle}>{item.name}</Text>
+                    <Text style={styles.transactionAmount}>{item.amount < 0 && '-'}${Math.abs(item.amount).toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.progressBarContainer}>
+                    <View style={styles.progressBarBackground}>
+                      <View style={[styles.progressBar, { width: `${percentage}%`, backgroundColor: color }]} />
                     </View>
-                  );
-                }}
-            >
-            </FlatList>
+                    <Text style={styles.transactionDate}>{item.date}</Text>
+                  </View>
+                </View>
+              );
+            }}
+          />
         </View>
-    )
-}
+      </TouchableOpacity>
+    </GestureHandlerRootView>
+  );
+};
 
 const styles = StyleSheet.create({
-    categoryContainer: {
-      marginVertical: 10,
-      marginHorizontal: 30,
-      paddingHorizontal: 15,
-      backgroundColor: '#FFFFFF',
-      borderRadius: 15,
-      padding: 15,
-      borderWidth: 1,
-      borderColor: '#E0E0E0',
-      // shadowColor: '#000',
-      // shadowOffset: { width: 0, height: 2 },
-      // shadowOpacity: 0.1,
-      // shadowRadius: 8,
-      // elevation: 5,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 10,
-    },
-    categoryTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#4F4F4F',
-      flex: 1,
-    },
-    categoryTotal: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#4F4F4F',
-    },
-    transactionContainer: {
-      flexDirection: 'column',
-      marginBottom: 10,
-    },
-    transactionDetails: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    transactionTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#333',
-    },
-    transactionAmount: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#333',
-    },
-    transactionDate: {
-      fontSize: 13,
-      color: '#A0A0A0',
-      marginLeft: 30,
-    },
-    progressBarContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 10,
-      
-    },
-    progressBarBackground: {
-      backgroundColor: '#E0E0E0', // Color de fondo para simular la barra completa
-      borderRadius: 2,
-      flex: 1,
-    },
-    progressBar: {
-        height: 4,
-        borderRadius: 2,
-    },
+  categoryContainer: {
+    marginVertical: 10,
+    marginHorizontal: 30,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20, // Bordes redondeados
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    elevation: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+  categoryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#4F4F4F',
+    flex: 1,
+  },
+  categoryTotal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4F4F4F',
+  },
+  transactionContainer: {
+    flexDirection: 'column',
+    marginBottom: 10,
+  },
+  transactionDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  transactionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  transactionAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  transactionDate: {
+    fontSize: 13,
+    color: '#A0A0A0',
+    marginLeft: 30,
+  },
+  progressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  progressBarBackground: {
+    backgroundColor: '#E0E0E0',
+    borderRadius: 2,
+    flex: 1,
+  },
+  progressBar: {
+    height: 4,
+    borderRadius: 2,
+  },
 });
 
 export default CategoryCard;

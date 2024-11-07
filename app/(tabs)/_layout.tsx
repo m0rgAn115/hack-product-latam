@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import React from 'react';
 
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
@@ -33,13 +33,13 @@ export default function TabLayout() {
         }}
       />
        <Tabs.Screen
-        name="expenses"
-        options={{
-          title: 'Gastos',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />          ),
-        }}
-      />
+          name="expenses"
+          options={{
+            title: 'Expenses',
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />          ),
+          }}
+        />
       <Tabs.Screen
         name="transactions"
         options={{
