@@ -20,10 +20,10 @@ const Header: React.FC<HeaderProps> = ({ onBackPress, onIconPress, focused = fal
       </TouchableOpacity>
 
       {/* Título */}
-      <Text style={styles.headerTitle}>Gastos</Text>
+      <Text style={styles.headerTitle}>Expenses</Text>
 
       {/* Botón de ícono derecho */}
-      <TouchableOpacity onPress={onIconPress} style={styles.rightButton}>
+      <TouchableOpacity onPress={ onIconPress } style={styles.rightButton}>
         <TabBarIcon 
           name={focused ? "bar-chart" : "bar-chart-outline"} // Cambia según 'focused' si es relevante
           size={24} 

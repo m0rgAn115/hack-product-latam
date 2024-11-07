@@ -2,7 +2,7 @@ import { Image, StyleSheet, Platform, Pressable, Text, TextInput, View, ScrollVi
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import ExpensesPerMonth from '../../components/Expenses/ExpensesPerMonth'; // Importa los datos
+// import ExpensesPerMonth from '../../components/Expenses/ExpensesPerMonth'; // Importa los datos
 import { Transaction } from '@/components/Interfaces/transaction.interface';
 import { RenderGraphic } from '@/components/chat/RenderGraphic';
 import GraphPerMonth from '@/components/Expenses/GraphPerMonth';
@@ -57,16 +57,16 @@ export default function ChatScreen() {
   })
 
 
-  const monthlyExpenses = ExpensesPerMonth[9] || [];
+  // const monthlyExpenses = ExpensesPerMonth[9] || [];
 
-  // Calcula el total de gastos del mes
-  const totalExpenses = monthlyExpenses.reduce((sumCategory, category) => {
-    const totalCategory = category.transacciones.reduce((sumTransaction, transaction) => {
-      return sumTransaction + transaction.monto;
-    }, 0);
-    return sumCategory + totalCategory;
-  }, 0);
-  const transactions = monthlyExpenses.flatMap(category => category.transacciones);
+  // // Calcula el total de gastos del mes
+  // const totalExpenses = monthlyExpenses.reduce((sumCategory, category) => {
+  //   const totalCategory = category.transacciones.reduce((sumTransaction, transaction) => {
+  //     return sumTransaction + transaction.monto;
+  //   }, 0);
+  //   return sumCategory + totalCategory;
+  // }, 0);
+  // const transactions = monthlyExpenses.flatMap(category => category.transacciones);
 
   
 
