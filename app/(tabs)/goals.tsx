@@ -46,7 +46,7 @@ const data:Goal[] = [
 export default function TabTwoScreen() {
 
   const handleSelectGoal = (goal:Goal) => {
-    router.push(`/goal-details?text=${goal.title}&amount=${goal.total_amount}`); 
+    router.push(`/goal-details?q_goal_title=${goal.title}&q_goal_amount=${goal.total_amount}`); 
   }
 
   const router = useRouter();
@@ -54,8 +54,10 @@ export default function TabTwoScreen() {
   const handlePress = (texto:string|undefined) => {
 
     // Navegar a la pantalla de objetivo
-    router.push(`/goal-details?text=${texto}`); // Asegúrate de que la ruta coincida con el nombre del archivo
+    router.push(`/goal-details?q_goal_title=${texto}`); // Asegúrate de que la ruta coincida con el nombre del archivo
   };
+
+  
 
   return (
     <SafeAreaView>

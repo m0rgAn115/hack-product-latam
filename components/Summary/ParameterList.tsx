@@ -31,7 +31,30 @@ const ParameterList: React.FC<ParameterListProps> = ({ parameters }) => {
           </View>
           <View style={[styles.row, { marginBottom: param.showMore ? 18 : 0 }]}>
             
-            <Text style={[styles.statusText, { color: param.statusColor }]}>{param.status}</Text>
+            <Text style={[
+                styles.statusText,
+                { color: 
+                    param.percentage > 80 ? 'green' :  // Sobresaliente
+                    param.percentage > 60 ? 'blue' :  // Bueno
+                    param.percentage > 40 ? 'orange' :  // Aceptable
+                    param.percentage > 20 ? 'yellow' :  // Mejorable
+                    'red'  // Deficiente
+                }
+              ]}
+            >
+              {
+                param.percentage > 80
+                ? 'Excelente'
+                : param.percentage > 60
+                ? 'Bueno'
+                : param.percentage > 40
+                ? 'Regular'
+                : param.percentage > 20
+                ? 'Bajo'
+                : 'Crítico'
+              }
+            </Text>
+            
             {param.showMore && (
                 <Text style={styles.showMoreText}>Conocer más {'>'}</Text>
             )}
@@ -66,16 +89,19 @@ const styles = StyleSheet.create({
   percentageText: {
     color: '#303048',
     fontFamily: 'DMSans_700Bold',
-    fontSize: 16,
+    fontSize: 15,
+    opacity: 0.8,
   },
   statusText: {
-    fontFamily: 'DMSans_400Regular',
+    fontFamily: 'DMSans_500Medium',
     fontSize: 14,
+    opacity: 0.6,
   },
   showMoreText: {
     color: '#0066FF',
     fontFamily: 'DMSans_500Medium',
     fontSize: 14,
+    opacity: 0.8,
   },
 });
 
