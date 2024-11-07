@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -17,11 +17,12 @@ interface ComponentProps {
 }
 
 export const categoryColors = {
-  "Food and Drink": "#FF7A61",
-  Entertainment: "#61A7FF",
-  Shopping: "#FFA761",
-  Utilities: "#61FFA7",
+  "Food and Drink": "#FF6F61",
+  Entertainment: "#6C9BF3",
+  Shopping: "#FFB84D",
+  Utilities: "#73D8B1",
 };
+
 
 const CategoryCard = ({ category, transactions, onPress, color }: ComponentProps) => {
   const totalCategory = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -36,21 +37,33 @@ const CategoryCard = ({ category, transactions, onPress, color }: ComponentProps
             <Text style={styles.categoryTotal}>${totalCategory.toFixed(2)}</Text>
           </View>
           <FlatList
-            data={transactions.slice(0, 2)} // Limitar a las primeras 2 transacciones
+            data={transactions.slice(0, 3)} // Limitar a las primeras 2 transacciones
             keyExtractor={(transaction, index) => `${transaction.name}-${transaction.date}-${index}`}
             renderItem={({ item }) => {
               const percentage = (Math.abs(item.amount) / totalCategory) * 100;
               return (
                 <View style={styles.transactionContainer}>
                   <View style={styles.transactionDetails}>
-                    <Text style={styles.transactionTitle}>{item.name}</Text>
-                    <Text style={styles.transactionAmount}>{item.amount < 0 && '-'}${Math.abs(item.amount).toFixed(2)}</Text>
+                    <View style={[styles.iconLogo]}>
+                      {
+                        item.logo_url ? (
+                          <Image source={{uri: item.logo_url}}
+                            style={styles.logoImage}
+                            resizeMode="contain" // Opcional: ajusta cómo se escala la imagen
+                            accessibilityLabel={item.name}
+                        />
+                        ) : (
+                          <View style={[styles.logoNone, {backgroundColor: color}]} />
+                        )
+                      }
+                    </View>
+                    <View>
+                      <Text style={styles.transactionTitle}>{item.name}</Text>
+                      <Text style={styles.transactionDate}>{item.date}</Text>
+                    </View>
                   </View>
                   <View style={styles.progressBarContainer}>
-                    <View style={styles.progressBarBackground}>
-                      <View style={[styles.progressBar, { width: `${percentage}%`, backgroundColor: color }]} />
-                    </View>
-                    <Text style={styles.transactionDate}>{item.date}</Text>
+                    <Text style={styles.transactionAmount}>{item.amount < 0 && '-'}${Math.abs(item.amount).toFixed(2)}</Text>
                   </View>
                 </View>
               );
@@ -63,7 +76,7 @@ const CategoryCard = ({ category, transactions, onPress, color }: ComponentProps
 };
 
 const styles = StyleSheet.create({
-  categoryContainer: {
+  categoryContainer: { 
     marginVertical: 10,
     marginHorizontal: 30,
     paddingHorizontal: 15,
@@ -77,13 +90,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   icon: {
-    width: 24,
-    height: 24,
+    width: 12,
+    height: 12,
     borderRadius: 12,
     marginRight: 10,
+  },
+  iconLogo: {
+    elevation: 2,
+    borderRadius: 100,
+    marginRight: 10,
+    
   },
   categoryTitle: {
     fontSize: 18,
@@ -97,33 +116,31 @@ const styles = StyleSheet.create({
     color: '#4F4F4F',
   },
   transactionContainer: {
-    flexDirection: 'column',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
     marginBottom: 10,
   },
   transactionDetails: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   transactionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
   },
   transactionAmount: {
-    fontSize: 16,
+    fontSize: 14.5,
     fontWeight: 'bold',
     color: '#333',
   },
   transactionDate: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#A0A0A0',
-    marginLeft: 30,
   },
   progressBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   progressBarBackground: {
     backgroundColor: '#E0E0E0',
@@ -134,6 +151,20 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
   },
+  logoImage: {
+    width: 26, 
+    height: 26,
+    borderRadius: 20, 
+  },
+  logoNone: {
+    width: 16,
+    marginHorizontal: 5,
+    height: 2,
+  },
+  transactValue: {
+    fontSize: 12,
+    color: '#A0A0A0',
+  }
 });
 
 export default CategoryCard;

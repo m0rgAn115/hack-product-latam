@@ -1,8 +1,8 @@
 import { View, ScrollView, StyleSheet, Text, FlatList, Button } from 'react-native';
-import React, { useState } from 'react';
-import Header from '../../components/Expenses/Header';
-import AlertCard from '../../components/Expenses/AlertCard';
-import MonthSelector from '../../components/Expenses/MonthSelector';
+import React, { useState, useEffect, useContext } from 'react';
+import Header from '@/components/Expenses/Header';
+import AlertCard from '@/components/Expenses/AlertCard';
+import MonthSelector from '@/components/Expenses/MonthSelector';
 import CategoryCard from '@/components/Expenses/CategoryCard';
 import GraphPerMonth from '@/components/Expenses/GraphPerMonth';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -10,7 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import CategoryDetailScreen from '@/components/Expenses/CategoryDetailScreen';
 import SubscriptionsCard from '@/components/Expenses/SubscriptionsCard';
-import { filteredTransactions } from '@/components/Expenses/filterTransactions';
+import { filterTransactions } from '@/components/Expenses/filterTransactions';
 import { categoryColors } from '@/components/Expenses/CategoryCard';
 import { MainCategories } from '@/components/Expenses/categoriesConfig';
 import { mainCategories } from '@/components/Expenses/categoriesConfig';
@@ -49,22 +49,67 @@ const Months_data: string[] = [
 ];
 
 const GastosComponent = () => {
+  const [transactionsData, setTransactions] = useState<PlaidTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [mesSeleccionado, setMesSeleccionado] = useState(9);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [showGraph, setShowGraph] = useState(false); // Estado para controlar la visibilidad de la gráfica
 
-  const filteredTransactionsByMonth = filteredTransactions.filter(transaction => {
+  const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth());
+  const [modalVisible, setModalVisible] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/transactions/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            accessToken: 'access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a',
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Error al obtener las transacciones');
+        }
+  
+        const data: PlaidTransaction[] = await response.json();
+        const filteredData = filterTransactions(data); // Filtrar los datos aquí
+        setTransactions(filteredData); // Actualizar el estado con los datos filtrados
+        setIsLoading(false);
+  
+      } catch (error) {
+        console.error('Error al obtener las transacciones:', error);
+        setError(error as Error);
+        setIsLoading(false);
+      }
+    };
+  
+    fetchTransactions();
+  }, []);
+
+  if (isLoading) {
+    return <Text>Cargando...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error: {error.message}</Text>;
+  }
+  
+  const filteredTransactionsByMonth = transactionsData.filter(transaction => {
     const transactionMonth = new Date(transaction.date).getMonth();
     return transactionMonth === mesSeleccionado;
   });
-
+  
   const hasTransactions = filteredTransactionsByMonth.length > 0;
   
   const totalExpenses = hasTransactions
     ? filteredTransactionsByMonth.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0)
     : 0;
-
+  
   const transformedTransactionsForGraph = hasTransactions
     ? filteredTransactionsByMonth.map(transaction => ({
         titulo: transaction.name,
@@ -73,9 +118,8 @@ const GastosComponent = () => {
         fecha: transaction.date,
       }))
     : [];
-
-
-    const groupedTransactions = hasTransactions
+  
+  const groupedTransactions = hasTransactions
     ? filteredTransactionsByMonth.reduce((acc, transaction) => {
         const mainCategory = (Object.keys(mainCategories) as (keyof MainCategories)[]).find(mainCat =>
           transaction.category.some(cat => mainCategories[mainCat].includes(cat))
@@ -86,13 +130,13 @@ const GastosComponent = () => {
         return acc;
       }, {} as { [key in keyof MainCategories | "Others"]: PlaidTransaction[] })
     : {};
-
-
-const groupedData = (Object.keys(groupedTransactions) as Array<keyof typeof mainCategories | "Others">).map(category => ({
-  category,
-  transactions: groupedTransactions[category as keyof typeof groupedTransactions],
-  color: categoryColors[category as keyof typeof categoryColors] || '#CCCCCC',
-}));
+  
+  const groupedData = (Object.keys(groupedTransactions) as Array<keyof typeof mainCategories | "Others">).map(category => ({
+    category,
+    transactions: groupedTransactions[category as keyof typeof groupedTransactions],
+    color: categoryColors[category as keyof typeof categoryColors] || '#F2E1C1',
+  }));
+  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -115,7 +159,7 @@ const groupedData = (Object.keys(groupedTransactions) as Array<keyof typeof main
 
         <Button
           title={showGraph ? "Hide Graph" : "Show Graph"}
-          onPress={() => setShowGraph(prev => !prev)} // Alterna el estado de visibilidad de la gráfica
+          onPress={() => setShowGraph(prev => !prev)} 
         />
 
         <ScrollView contentContainerStyle={styles.scrollContent}>

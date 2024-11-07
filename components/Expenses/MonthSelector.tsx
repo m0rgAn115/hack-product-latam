@@ -85,14 +85,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end', // Ubica el modal en la parte inferior
-    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Reducir la opacidad del fondo para hacerlo más discreto
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   modalContent: {
     backgroundColor: 'white',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    maxHeight: 300, // Limita la altura del modal para que no ocupe toda la pantalla
+    maxHeight: 350,
     paddingBottom: 20,
   },
   modalItem: {
