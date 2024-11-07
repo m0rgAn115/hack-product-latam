@@ -1,20 +1,36 @@
-import React from 'react';
-import { StyleSheet  } from 'react-native';
-import { WebView } from 'react-native-webview';
+import React, { useEffect, useState } from 'react';
+import PlaidLink from '@/components/Plaid/PlaidLink'
+import { Text } from 'react-native';
 
-const WebViewComponent: React.FC = () => {
-  const url = 'https://blog.logrocket.com/';
+export default function App() {
+
+  const [linkToken, setLinkToken] = useState(null);
+
+  useEffect(() => {
+    const createLinkToken = async () => {
+      const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setLinkToken(data.link_token); // Asigna el token de enlace recibido
+    };
+
+    createLinkToken();
+  }, []);
+
+  if (!linkToken) {
+    return <Text>Loading...</Text>; // Muestra un mensaje de carga mientras se genera el token
+  }
 
   return (
-      <WebView source={{ uri: url }} style={styles.webview} />
-  );
-};
-
-const styles = StyleSheet.create({
-  webview: {
-    flex: 1,
-    width: '100%',
-  },
-});
-
-export default WebViewComponent;
+    <PlaidLink
+      linkToken={linkToken}
+      onEvent={(event) => console.log(event)}
+      onExit={(exit) => console.log(exit)}
+      onSuccess={(success) => console.log(success.publicToken)}
+    />
+  )
+}
