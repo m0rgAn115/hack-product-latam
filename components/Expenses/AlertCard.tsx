@@ -11,14 +11,15 @@ const AlertCard: React.FC<AlertCardProps> = ({ message, iconKey }) => {
     return (
     <View style={styles.alertContainer}>
       <View style={styles.textContainer}>
-        <Text style={styles.title}>
-          ¡Cuidado! {Icons[iconKey].iconName}
-        </Text>
-        <Text style={styles.alertText}>
-            {message}
-        </Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>¡Alert!</Text>
+          <View style={styles.iconWrapper}>
+            {Icons[iconKey].iconName}
+          </View>
+        </View>
+        <Text style={styles.alertText}>{message}</Text>
         <TouchableOpacity style={styles.linkContainer}>
-          <Text style={styles.link}>Conocer más ›</Text>
+          <Text style={styles.link}>Learn more ›</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -29,28 +30,22 @@ const styles = StyleSheet.create({
   alertContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#FFFFFF', // Fondo suave para la alerta
+    backgroundColor: '#FFFFFF',
     padding: 15,
     borderRadius: 15,
-    marginTop: -30,
+    marginTop: 10,
     marginBottom: 10,
     marginHorizontal: 30,
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
     elevation: 2,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-    resizeMode: 'contain',
   },
   textContainer: {
     flex: 1,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', // Centra el ícono y el texto verticalmente
   },
   title: {
     fontSize: 16,
@@ -58,19 +53,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 5,
   },
+  iconWrapper: {
+    marginLeft: 5,
+    alignItems: 'center', // Centra el ícono horizontalmente
+    justifyContent: 'center', // Centra el ícono verticalmente
+  },
   alertText: {
     fontSize: 14,
     color: '#333',
     marginBottom: 8,
   },
-  smallIcon: {
-    width: 18,
-    height: 18,
-    marginLeft: 5,
-    resizeMode: 'contain',
-  },
   linkContainer: {
-    alignSelf: 'flex-end'
+    alignSelf: 'flex-end',
   },
   link: {
     fontSize: 14,

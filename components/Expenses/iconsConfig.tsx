@@ -31,7 +31,7 @@ export const iconColors = {
 
 export const Icons = {
     coffee: {
-      iconName: <Ionicons name={'cafe'} size={20} style={iconStyles.cofee} />,
+      iconName: <Ionicons name={'cafe'} size={20} color="#FF9900" style={iconStyles.cofee} />,
     },
     transport: {
       iconName: (
