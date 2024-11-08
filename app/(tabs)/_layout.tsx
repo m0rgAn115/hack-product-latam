@@ -42,21 +42,48 @@ export default function TabLayout() {
               <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />
             ),
           }}
-        />
-        <Tabs.Screen
-          name="chat"
-          options={{
-            title: "Chat",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "chatbox" : "chatbox-outline"}
-                color={color}
-              />
-            ),
-          }}
-        />
-      </Tabs>
-    </SafeAreaView>
+
+        /> */}
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: "Transactions",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "code-slash" : "code-slash-outline"}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Chat",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "chatbox" : "chatbox-outline"}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="goals"
+        options={{
+          title: "Goals",
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "trophy" : "trophy-outline"}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tabs>
+
   );
 }
 
