@@ -85,6 +85,7 @@ export const Login = () => {
   
 
   return (
+    <>
     <View style={{ flex: 1, backgroundColor: 'white', paddingVertical: 20, paddingHorizontal: 40, justifyContent: 'center' }}>
       <Text style={{ fontSize: 20, marginTop: 20, textAlign: 'center', fontWeight: '600' }}>Bienvenido a Tepoz</Text>
 
@@ -119,6 +120,7 @@ export const Login = () => {
         <Text style={{ textAlign: 'center', fontSize: 18, fontWeight: '600', color: 'white' }}>Login</Text>
       </Pressable>
     </View>
+    </>
   );
 };
 
