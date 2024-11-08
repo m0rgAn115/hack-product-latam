@@ -1,3 +1,4 @@
+import { useUserStore } from "@/app/store/useUserStore";
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
@@ -5,6 +6,9 @@ import { PieChart } from "react-native-gifted-charts";
 const Balance = () => {
   const balanceTotal = "1040.00";
   const porcent = "16.8%";
+
+  const {  saldo } = useUserStore();
+
 
   const pieData = [
     {
@@ -31,7 +35,7 @@ const Balance = () => {
         <Text>Tu balance total</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ fontWeight: "bold", fontSize: 22 }}>
-            ${balanceTotal}
+            ${saldo}
           </Text>
           <View
             style={{

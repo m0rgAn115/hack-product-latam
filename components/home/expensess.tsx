@@ -52,6 +52,7 @@ const Expensess = () => {
   const [transactionsData, setTransactions] = useState<PlaidTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [getLogo, setLogo] = useState('access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a');
   
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -68,7 +69,7 @@ const Expensess = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            accessToken: 'access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a',
+            accessToken: getLogo,
           }),
         });
   
@@ -144,7 +145,7 @@ const Expensess = () => {
           textAlign: "center",
           fontSize: 20,
           fontWeight: "bold",
-          paddingTop: 32,
+          paddingTop: 50,
           paddingBottom: 8,
         }}>
         Gastos

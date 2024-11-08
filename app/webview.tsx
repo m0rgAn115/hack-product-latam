@@ -1,19 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import PlaidLink from '@/components/Plaid/PlaidLink'
 import { View, Alert, Text } from 'react-native';
+import useGetTokens from '@/hooks/useGetTokens';
+import useFetch from '@/hooks/useFetch';
+import { useUserStore } from './store/useUserStore';
+import { router } from 'expo-router';
 
-const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/';
+const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/';
 
 export default function PlaidShow() {
   const [linkToken, setLinkToken] = useState(null);
+  const { correo } = useUserStore(); 
 
   useEffect(() => {
     const createLinkToken = async () => {
+      const tokens = await useGetTokens()
+    if (!tokens?.id_token) {
+        throw new Error('No authorization token available');
+        return;
+    }
+      
+
       try {
         const response = await fetch(API_BASE_URL, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': tokens.id_token
           },
         });
 
@@ -42,12 +55,19 @@ export default function PlaidShow() {
   }
 
   const handleSuccess = async (success) => {
+      const tokens = await useGetTokens()
+    if (!tokens?.id_token) {
+        throw new Error('No authorization token available');
+        return;
+    }
 
+    console.log()
     try {
       const response = await fetch(API_BASE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': tokens.id_token
         },
         body: JSON.stringify({
           publicToken: success.publicToken,
@@ -60,7 +80,27 @@ export default function PlaidShow() {
       }
 
       const data = await response.json();
-      console.log('Server response:', data);
+      const bodyData = JSON.parse(data.body);
+      console.log('token:', bodyData.accessToken);
+
+      console.log('Server response:', bodyData);
+      console.log('token:', bodyData.accessToken);
+
+      useFetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/dynamo', 
+        {
+          "correo": correo,
+          "accessToken": bodyData.accessToken
+        },
+        'PUT'
+      ).then((res) => {
+        Alert.alert(
+          'Account Connected',
+          'The account was connected successfully!',
+          [{ text: 'OK' }]
+        );
+        router.navigate('/(tabs)')
+      })
+
     } catch (error) {
       console.error('Error during data submission:', error);
       Alert.alert(

@@ -1,11 +1,12 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
+import { useUserStore } from "@/app/store/useUserStore";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 
 const Header = () => {
-  const user = { name: "Charly" };
+  const { nombre } = useUserStore();
 
   type RootStackParamList = {
     Home: undefined;
@@ -44,8 +45,8 @@ const Header = () => {
             style={{ height: 50, width: 50, borderRadius: 50 }}
           />
           <View>
-            <Text style={{ fontSize: 12, marginLeft: 10 }}>
-              Hola, {user.name}
+            <Text style={{ fontSize: 12, marginLeft: 10, color: 'black' }}>
+              Hola, {nombre}
             </Text>
             <Text
               style={{ fontSize: 14, fontWeight: "semibold", marginLeft: 10 }}>

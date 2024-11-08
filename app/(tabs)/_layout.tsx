@@ -1,5 +1,7 @@
 import { Stack, Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React from "react";
+import { SafeAreaView, StyleSheet } from "react-native";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
@@ -9,30 +11,38 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        headerShown: false,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "home" : "home-outline"}
-              color={color}
-            />
-          ),
-        }}
-      />
-      {/* <Tabs.Screen
-          name="expenses"
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: Colors["light"].tint,
+          tabBarStyle: {
+            backgroundColor: '#fff',
+            borderTopColor: '#fff', 
+          },
+          headerShown: false,
+        }}>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, focused }) => (
+              <TabBarIcon
+                name={focused ? "home" : "home-outline"}
+                color={color}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="transactions"
           options={{
             title: 'Expenses',
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />          ),
+              <TabBarIcon name={focused ? 'calendar' : 'calendar-outline'} color={color} />
+            ),
           }}
+
         /> */}
       <Tabs.Screen
         name="transactions"
@@ -53,7 +63,7 @@ export default function TabLayout() {
           title: "Chat",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "chatbubble" : "chatbubble-outline"}
+              name={focused ? "chatbox" : "chatbox-outline"}
               color={color}
             />
           ),
@@ -73,5 +83,13 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff'
+  },
+});

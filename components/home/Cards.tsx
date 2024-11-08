@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import { useUserStore } from "@/app/store/useUserStore";
+import useFetch from "@/hooks/useFetch";
+import useGetTokens from "@/hooks/useGetTokens";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
   View,
   ScrollView,
@@ -10,59 +14,103 @@ import {
   Platform,
 } from "react-native";
 
+type Card = {
+  id: string,
+  balance: number,
+  name: string,
+  type: string,
+  accent: string,
+};
+
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.4;
 const CARD_HEIGHT = CARD_WIDTH * 1.1;
 
 const Cards = () => {
-  const [cards, setCards] = useState([
-    { id: 1, type: "Credito", accent: "#4A90E2", lastDigits: 4567 },
-    { id: 2, type: "Debito", accent: "#FF6B6B", lastDigits: 8901 },
-    { id: 3, type: "Debito", accent: "#50E3C2", lastDigits: 3456 },
-  ]);
+  const {  setUser,saldo } = useUserStore();
+  const { accessToken } = useUserStore();
+  const [cards, setCards] = useState<Card[]>([]);
 
-  const [showForm, setShowForm] = useState(false);
-  const [newCardType, setNewCardType] = useState("");
-  const [newCardAccent, setNewCardAccent] = useState("");
-  const [newCardLastDigits, setNewCardLastDigits] = useState("");
 
-  interface CardProps {
-    accent: string;
-    type: string;
-    lastDigits: string;
-  }
+  useEffect(() => {
+    const suma = cards.reduce((total, card) => total + card.balance, 0);
+    setUser({ ...useUserStore.getState(), saldo: suma });
+    
+  }, [cards])
+  
+  
 
-  const Card = ({ accent, type, lastDigits }: CardProps) => (
-    <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]}>
-      <View style={[styles.accentLine, { backgroundColor: accent }]} />
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <View style={styles.chipContainer}>
-            <View style={styles.chip} />
+  useEffect(() => {
+    const fetchCardsForTokens = async () => {
+      const fetchedCards: Card[] = [];
+
+      for (const token of accessToken) {
+        const data = await useFetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards', {
+          accessToken: token,
+        }, 'POST');
+
+        
+
+        const newCards = data.map((card: any) => ({
+          id: card.account_id,
+          balance: card.balances.current,
+          name: card.name,
+          type: card.type,
+          accent: card.accent,
+        }));
+
+        fetchedCards.push(...newCards);
+      }
+
+      // Actualizamos el estado de cards evitando duplicados
+      const uniqueCards = fetchedCards.filter((card, index, self) =>
+        index === self.findIndex((c) => c.id === card.id)
+      );
+      setCards(uniqueCards);
+    };
+
+    fetchCardsForTokens();
+  }, [accessToken]);
+
+  const CardComponent = (card: Card) => {
+    let accent = "#ffffff";
+
+    switch (card.type) {
+      case "credit":
+        card.type = "Crédito";
+        accent = "#9cd198";
+        break;
+      case "depository":
+        card.type = "Débito";
+        accent = "#0683dd";
+        break;
+      case "prepaid":
+        card.type = "Prepagada";
+        accent = "#D3D3D3";
+        break;
+    }
+
+    return (
+      <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]}>
+        <View style={[styles.accentLine, { backgroundColor: accent }]} />
+        <View style={styles.cardContent}>
+          <View style={styles.cardHeader}>
+            <View style={styles.chipContainer}>
+              <View style={styles.chip} />
+            </View>
+            <Text style={[styles.cardType, { fontWeight: "light" }]}>
+              {card.type}
+            </Text>
           </View>
-          <Text
-            style={[styles.cardType, { color: accent, fontWeight: "light" }]}>
-            {type}
-          </Text>
+          <Text style={[styles.cardNumber, { fontWeight: '600' }]}> {card.name}</Text>
+          <Text style={[styles.cardNumber, { fontSize: 14, color: '#D4AF37', fontWeight: '600'}]}>... {card.id.slice(0,4)}</Text>
         </View>
-
-        <Text style={styles.cardNumber}>•••• {lastDigits}</Text>
       </View>
-    </View>
-  );
+    );
+  };
 
   const addNewCard = () => {
-    const newCard = {
-      id: cards.length + 1,
-      type: newCardType,
-      accent: newCardAccent,
-      lastDigits: parseInt(newCardLastDigits),
-    };
-    setCards([...cards, newCard]);
-    setNewCardType("");
-    setNewCardAccent("");
-    setNewCardLastDigits("");
-    setShowForm(false);
+    // Lógica para añadir una nueva tarjeta (si es necesario)
   };
 
   return (
@@ -74,19 +122,23 @@ const Cards = () => {
           showsHorizontalScrollIndicator={false}
           decelerationRate="fast"
           snapToInterval={CARD_WIDTH + 20}
-          contentContainerStyle={styles.scrollContent}>
+          contentContainerStyle={styles.scrollContent}
+        >
           <TouchableOpacity
-            onPress={() => setShowForm(true)}
-            style={[styles.cardContainer, styles.addCardButton]}>
+            onPress={() => router.navigate('/webview')}
+            style={[styles.cardContainer, styles.addCardButton]}
+          >
             <Text style={styles.plusIcon}>+</Text>
           </TouchableOpacity>
-          {cards.map((card) => (
-            <View
-              key={card.id}
-              style={styles.cardContainer}>
-              <Card {...card} />
+
+          {cards ? cards.map((card) => (
+            <View key={card.id} style={styles.cardContainer}>
+              <CardComponent {...card} />
             </View>
-          ))}
+          ))
+          : 
+            <Text style={{ color: 'black' }} >Cargando tarjetas...</Text>
+        }
         </ScrollView>
       </View>
     </>
@@ -154,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   cardType: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
   },
   cardNumber: {
