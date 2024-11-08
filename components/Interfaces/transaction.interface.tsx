@@ -4,10 +4,12 @@ import { Icons } from '../Expenses/iconsConfig';
 export type IconsKeys = keyof typeof Icons;
 
 export type Transaction = {
-    titulo: string;
-    monto: number;
-    categoria: string;
-    fecha: string;
+    date: string,
+    amount: number
+    logo_url: string|null,
+    merchant_name: string|null,
+    name: string,
+    category: string[]
 }
 
 export type Category = {

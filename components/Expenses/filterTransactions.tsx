@@ -1,7 +1,6 @@
 import moment from 'moment';
 import { mainCategories } from './categoriesConfig';
 import { MainCategories } from './categoriesConfig';
-import plaidTransactions from './PlaidTransactions';
 
 interface PlaidTransaction {
     date: string;
@@ -30,4 +29,3 @@ export const filterTransactions = (transactions: PlaidTransaction[]): PlaidTrans
         }));
 }
 
-export const filteredTransactions = filterTransactions(plaidTransactions);

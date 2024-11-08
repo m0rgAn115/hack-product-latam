@@ -1,36 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import PlaidLink from '@/components/Plaid/PlaidLink'
-import { Text } from 'react-native';
+import { View, Alert, Text } from 'react-native';
 
-export default function App() {
+const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/';
 
+export default function PlaidShow() {
   const [linkToken, setLinkToken] = useState(null);
 
   useEffect(() => {
     const createLinkToken = async () => {
-      const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await response.json();
-      setLinkToken(data.link_token); // Asigna el token de enlace recibido
+      try {
+        const response = await fetch(API_BASE_URL, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch the link token');
+        }
+
+        const data = await response.json();
+        setLinkToken(data.link_token);
+
+      } catch (error) {
+        console.error('Error fetching link token:', error);
+        Alert.alert(
+          'Connection Error',
+          'Unable to fetch link token. Please try again later.',
+          [{ text: 'OK' }]
+        );
+      }
     };
 
     createLinkToken();
   }, []);
 
   if (!linkToken) {
-    return <Text>Loading...</Text>; // Muestra un mensaje de carga mientras se genera el token
+    return <Text>Loading...</Text>;
   }
 
+  const handleSuccess = async (success) => {
+
+    try {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          publicToken: success.publicToken,
+          metadata: success.metadata,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post data');
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+    } catch (error) {
+      console.error('Error during data submission:', error);
+      Alert.alert(
+        'Connection Error',
+        'Unable to connect. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    }
+
+  };
+
   return (
+    
     <PlaidLink
       linkToken={linkToken}
-      onEvent={(event) => console.log(event)}
-      onExit={(exit) => console.log(exit)}
-      onSuccess={(success) => console.log(success.publicToken)}
+      onEvent={(event) => console.log('Plaid event:', event)}
+      onExit={(exit) => console.log('Plaid exit:', exit)}
+      onSuccess={(success) => handleSuccess(success)}
     />
   )
 }

@@ -1,36 +1,42 @@
-import React, { useRef } from "react";
-import { WebView } from "react-native-webview";
-import queryString from "query-string";
-import { LinkErrorCode, LinkErrorType, LinkExitMetadataStatus } from './const'
+import React, { useRef } from 'react';
+import { WebView } from 'react-native-webview';
+import queryString from 'query-string';
+import { LinkErrorCode, LinkErrorType, LinkExitMetadataStatus } from './const';
 import Constants from 'expo-constants';
 
 export default function PlaidLink({ linkToken, onEvent, onExit, onSuccess }) {
-  let webviewRef = useRef();
+  const webviewRef = useRef(null);
 
   const handleNavigationStateChange = (event) => {
-    if (event.url.startsWith("plaidlink://")) {
-      const eventParams = queryString.parse(event.url.replace(/.*\?/, ""));
+    
+    if (event.url.startsWith('plaidlink://')) {
+      const eventParams = queryString.parse(event.url.replace(/.*\?/, ''));
 
-      const linkSessionId = eventParams.link_session_id;
-      const mfaType = eventParams.mfa_type;
-      const requestId = eventParams.request_id;
-      const viewName = eventParams.view_name;
-      const errorCode = eventParams.error_code;
-      const errorMessage = eventParams.error_message;
-      const errorType = eventParams.error_type;
-      const exitStatus = eventParams.exist_status;
-      const institutionId = eventParams.institution_id;
-      const institutionName = eventParams.institution_name;
-      const institutionSearchQuery = eventParams.institution_search_query;
-      const timestamp = eventParams.timestamp;
+      const {
+        link_session_id: linkSessionId,
+        mfa_type: mfaType,
+        request_id: requestId,
+        view_name: viewName,
+        error_code: errorCode,
+        error_message: errorMessage,
+        error_type: errorType,
+        exit_status: exitStatus,
+        institution_id: institutionId,
+        institution_name: institutionName,
+        institution_search_query: institutionSearchQuery,
+        timestamp,
+        event_name: eventName,
+        public_token: publicToken,
+        accounts: accountsRaw,
+      } = eventParams;
 
       if (!linkToken) {
-        console.warn("No link token provided.");
+        console.warn('No link token provided.');
       }
-      
-      if (event.url.startsWith("plaidlink://event") && onEvent) {
+
+      if (event.url.startsWith('plaidlink://event') && onEvent) {
         onEvent({
-          eventName: eventParams.event_name,
+          eventName,
           metadata: {
             linkSessionId,
             mfaType,
@@ -46,15 +52,15 @@ export default function PlaidLink({ linkToken, onEvent, onExit, onSuccess }) {
             timestamp,
           },
         });
-      } else if (event.url.startsWith("plaidlink://exit") && onExit) {
+      } else if (event.url.startsWith('plaidlink://exit') && onExit) {
         onExit({
           error: {
-            errorCode: LinkErrorCode[errorCode],
-            errorMessage: eventParams.error_message,
-            errorType: LinkErrorType[errorType],
+            errorCode: LinkErrorCode?.[errorCode] || errorCode,
+            errorMessage,
+            errorType: LinkErrorType?.[errorType] || errorType,
           },
           metadata: {
-            status: LinkExitMetadataStatus[exitStatus],
+            status: LinkExitMetadataStatus?.[exitStatus] || exitStatus,
             institution: {
               id: institutionId,
               name: institutionName,
@@ -63,20 +69,23 @@ export default function PlaidLink({ linkToken, onEvent, onExit, onSuccess }) {
             requestId,
           },
         });
-      } else if (event.url.startsWith("plaidlink://connected") && onSuccess) {
-        const publicToken = eventParams.public_token;
-        const accounts = JSON.parse(eventParams.accounts);
-        onSuccess({
-          publicToken,
-          metadata: {
-            institution: {
-              id: institutionId,
-              name: institutionName,
+      } else if (event.url.startsWith('plaidlink://connected') && onSuccess) {
+        try {
+          const accounts = JSON.parse(accountsRaw);
+          onSuccess({
+            publicToken,
+            metadata: {
+              institution: {
+                id: institutionId,
+                name: institutionName,
+              },
+              accounts,
+              linkSessionId,
             },
-            accounts,
-            linkSessionId,
-          },
-        });
+          });
+        } catch (error) {
+          console.error('Error parsing accounts:', error);
+        }
       }
       return false;
     }
@@ -92,9 +101,9 @@ export default function PlaidLink({ linkToken, onEvent, onExit, onSuccess }) {
         flex: 1,
         marginTop: Constants.statusBarHeight,
       }}
-      ref={(ref) => (webviewRef = ref)}
-      onError={() => webviewRef.reload()}
-      originWhitelist={["https://*", "plaidlink://*"]}
+      ref={webviewRef}
+      onError={() => webviewRef.current?.reload()}
+      originWhitelist={['https://*', 'plaidlink://*']}
       onShouldStartLoadWithRequest={handleNavigationStateChange}
     />
   );

@@ -6,16 +6,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { Transaction } from '@/components/Interfaces/transaction.interface';
 import { RenderGraphic } from '@/components/chat/RenderGraphic';
 import GraphPerMonth from '@/components/Expenses/GraphPerMonth';
+import { Transactions_Testing } from '@/components/Expenses/Transactions_Testing';
 
+const fechaActual = new Date();
 
 interface Conversation {
   rol: string;
   text: string;
   msg_number: number;
   chart?: {
-    show: boolean,
     transactions: Transaction[],
-    chart_type: 'barras' | 'lineas' | 'pay'
+    chart_type: 'barras' | 'lineas',
+    categoria: string[],
+    fecha_final: string,
+    fecha_inicial: string,
   }
 }
 
@@ -32,7 +36,7 @@ interface gastos_llm {
 
 }
 
-const server = 'http://192.168.0.80:5001'
+const server = 'http://127.0.0.1:5001'
 
 export default function ChatScreen() {
   const router = useRouter();
@@ -74,6 +78,8 @@ export default function ChatScreen() {
   const handleInputValue = () => {
     if (inputValue === '') setInputValue(undefined);
   };
+
+
 
   const fetchDataMaster = async () => {
     try {
@@ -150,7 +156,7 @@ export default function ChatScreen() {
       text,
       msg_number
     })) 
-    console.log("filter: ",JSON.stringify({ text: inputValue, previous_chats: conversation.map(({ rol, text, msg_number }) => ({
+    console.log("filter: ",JSON.stringify({ text: inputValue,date: fechaActual.toString(), previous_chats: conversation.map(({ rol, text, msg_number }) => ({
       rol,
       text,
       msg_number
@@ -162,7 +168,7 @@ export default function ChatScreen() {
       const response = await fetch(`${server}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputValue, previous_chats: conversation.map(({ rol, text, msg_number }) => ({
+        body: JSON.stringify({ text: inputValue, date: fechaActual.toString(), previous_chats: conversation.map(({ rol, text, msg_number }) => ({
           rol,
           text,
           msg_number
@@ -181,7 +187,7 @@ export default function ChatScreen() {
       }
 
       if (funcion === "consultar_gastos"){
-        const response = await  fetchDataAnalisis();
+        const response = await  fetchDataGastos();
         console.log("response:", response);
         return undefined
       }
@@ -193,12 +199,12 @@ export default function ChatScreen() {
     }
   };
 
-  const fetchDataAnalisis = async () => {
+  const fetchDataGastos = async () => {
     try {
       const response = await fetch(`${server}/analityc`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputValue, previous_chats: conversation }),
+        body: JSON.stringify({ text: inputValue, date: fechaActual.toString(),previous_chats: conversation }),
       });
       if (!response.ok) throw new Error('Error en la solicitud');
       const data = await response.json();
@@ -217,7 +223,49 @@ export default function ChatScreen() {
           chart: {
             show: true,
             transactions: transacciones_filtradas,
-            chart_type: data.response.tipoGrafica
+            chart_type: data.response.tipoGrafica,
+            categoria: data.response.categoria,
+            fecha_final: data.response.fecha_final,
+            fecha_inicial: data.response.fecha_inicial
+          }
+         },
+      ]);
+      
+      return undefined;
+    } catch (error) {
+      console.error('Error:', error);
+      return "Lo siento, hubo un error en la conversación.";
+    }
+  };
+
+  const fetchDataAnalisis = async () => {
+    try {
+      const response = await fetch(`${server}/analytics`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: inputValue, date: fechaActual.toString(),previous_chats: conversation }),
+      });
+      if (!response.ok) throw new Error('Error en la solicitud');
+      const data = await response.json();
+      console.log(data);
+
+      const transacciones_filtradas = transactions
+
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: data.response.mensajeAsistente },
+      ]);
+
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: '',
+          chart: {
+            show: true,
+            transactions: transacciones_filtradas,
+            chart_type: data.response.tipoGrafica,
+            categoria: data.response.categoria,
+            fecha_final: data.response.fecha_final,
+            fecha_inicial: data.response.fecha_inicial
           }
          },
       ]);
@@ -362,7 +410,7 @@ interface ChatItemProps {
 
 const ChatItem = ({ item, assistant_response_state, last_msg_index, info_completed_state, onPress, transactions }: ChatItemProps) => {
   return (
-    !item.chart?.show ? (
+    !item.chart ? (
       <View style={{ marginBottom: item.msg_number === last_msg_index ? 40 : (item.rol === 'user') ? 20 : 0, marginTop: ((item.rol === 'user')) ? 10 : 0 }}>
         <Text
           style={{
@@ -399,7 +447,7 @@ const ChatItem = ({ item, assistant_response_state, last_msg_index, info_complet
       </View>
     ) : (
       <View style={{ marginBottom: (item.msg_number === last_msg_index ) ? 40 : 10, marginTop: 0}} >
-        <RenderGraphic transactions={item.chart.transactions} tipo={item.chart.chart_type} />
+        <RenderGraphic transactions={item.chart.transactions} chart_info={item.chart} />
       </View>
     )
   );

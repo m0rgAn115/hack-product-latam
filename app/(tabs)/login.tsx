@@ -8,8 +8,8 @@ export const Login = () => {
   const router = useRouter();
 
 
-  const [emailValue, setEmailValue] = useState('ejemplo@ejemplo.com');
-  const [passValue, setPassValue] = useState('pruebacontra');
+  const [emailValue, setEmailValue] = useState('damianmor3005@gmail.com');
+  const [passValue, setPassValue] = useState('Moar758849@');
 
   async function saveSessionToken(sesion_token:string, refresh_token:string, token_type:string) {
     try {
@@ -25,7 +25,7 @@ export const Login = () => {
 
   const fetchLogin = async () => {
     try {
-      const response = await fetch('https://cognito-idp.us-east-1.amazonaws.com/', {
+      const response = await fetch('https://cognito-idp.us-east-1.amazonaws.com/us-east-1_J669mhiKV/.well-known/jwks.json/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-amz-json-1.1',
@@ -44,7 +44,8 @@ export const Login = () => {
       if (!response.ok) throw new Error('Error en la solicitud');
 
       const data = await response.json();
-      console.log(data);
+      console.log(data.AuthenticationResult.RefreshToken);
+      console.log(data.AuthenticationResult.IdToken);
       
       const session_token = data.AuthenticationResult.AccessToken;
       const refresh_token = data.AuthenticationResult.RefreshToken
