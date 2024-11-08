@@ -8,19 +8,30 @@ import {
   Animated,
   FlatList,
   ViewToken,
+  TouchableOpacity,
 } from "react-native";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 interface Slide {
   title: string;
   description: string;
-  image?: any;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
+  url?: string;
 }
 
 interface AutoSliderProps {
   customSlides?: Slide[];
   intervalTime?: number;
+}
+
+interface ApiResponse {
+  response: {
+    descripcion_recomendacion: string;
+    titulo_recomendacion: string;
+    url_imagen: string;
+    url_recomendacion: string;
+  };
 }
 
 const Slides: React.FC<AutoSliderProps> = ({
@@ -32,11 +43,56 @@ const Slides: React.FC<AutoSliderProps> = ({
   const flatListRef = useRef<FlatList<Slide>>(null);
   const { width } = Dimensions.get("window");
 
+  type RootStackParamList = {
+    Home: undefined;
+    Summary: undefined;
+    CategoryDetail: {
+      category: string;
+      transactions: Array<{
+        name: string;
+        amount: number;
+        date: string;
+        logo_url?: string;
+        merchant_name?: string;
+      }>;
+    };
+    subscriptions: undefined;
+  };
+
+  const navigation = useNavigation();
+
+  const [recommendationData, setRecommendationData] = useState<
+    ApiResponse["response"] | null
+  >(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5001/recommend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            accessToken: "access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a",
+          }),
+        });
+        const result: ApiResponse = await response.json();
+        console.log(result);
+        setRecommendationData(result.response);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const defaultSlides: Slide[] = [
     {
-      title: "Habla con tu dinero.",
+      title: "Talk to your money",
       description:
-        "¿Tienes preguntas? Usa nuestro chat personalizado para recibir orientación y aprovechar mejor tus finanzas.",
+        "Do you have questions? Use our custom chat to get guidance and make the most of your finances.",
       icon: (
         <Icon
           name="chat"
@@ -44,30 +100,40 @@ const Slides: React.FC<AutoSliderProps> = ({
           color="#4AC0F2"
         />
       ),
+      url: "chat",
     },
     {
-      title: "Cumple tus metas",
+      title:
+        recommendationData?.titulo_recomendacion || "Everything in one place",
       description:
-        "Establece metas financieras y haz un seguimiento de tu progreso en tiempo real.",
-      icon: (
-        <Icon
-          name="dashboard"
-          size={80}
-          color="#4CAF50"
-        />
-      ),
+        recommendationData?.descripcion_recomendacion ||
+        "Connect your bank accounts and credit cards to get a complete view of your finances.",
+      icon:
+        recommendationData == null ? (
+          <Icon
+            name="rocket-launch"
+            size={80}
+            color="#2196F3"
+          />
+        ) : (
+          <Image
+            source={{ uri: recommendationData?.url_imagen }}
+            style={{ width: 80, height: 80 }}
+          />
+        ),
+      url: "chat",
     },
     {
-      title: "Todo en un solo lugar",
-      description:
-        "Conecta tus cuentas bancarias y tarjetas de crédito para tener una vista completa de tus finanzas.",
+      title: "Achieve your goals",
+      description: "Set financial goals and track your progress in real time.",
       icon: (
         <Icon
-          name="rocket-launch"
+          name="trending-up"
           size={80}
           color="#2196F3"
         />
       ),
+      url: "goals",
     },
   ];
 
@@ -100,22 +166,13 @@ const Slides: React.FC<AutoSliderProps> = ({
   // Renderizar cada slide
   const renderItem = ({ item }: { item: Slide }) => {
     return (
-      <View style={[styles.slide, { width }]}>
-        {item.image && (
-          <Image
-            source={
-              typeof item.image === "string" ? { uri: item.image } : item.image
-            }
-            style={styles.image}
-            resizeMode="contain"
-          />
-        )}
-
+      <TouchableOpacity
+        style={[styles.slide, { width }]}
+        onPress={() => navigation.navigate("chat")}>
         {item.icon && <View style={styles.iconContainer}>{item.icon}</View>}
-
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -228,6 +285,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     textAlign: "center",
+    paddingHorizontal: 20,
   },
   description: {
     fontSize: 16,
