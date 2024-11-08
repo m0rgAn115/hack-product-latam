@@ -11,11 +11,12 @@ export const Login = () => {
   const [emailValue, setEmailValue] = useState('damianmor3005@gmail.com');
   const [passValue, setPassValue] = useState('Moar758849@');
 
-  async function saveSessionToken(sesion_token:string, refresh_token:string, token_type:string) {
+  async function saveSessionToken(sesion_token:string, refresh_token:string, token_type:string, id_token:string) {
     try {
       await AsyncStorage.setItem('session_token', sesion_token);
       await AsyncStorage.setItem('refresh_token', refresh_token);
       await AsyncStorage.setItem('token_type', token_type);
+      await AsyncStorage.setItem('id_token', id_token);
       console.log('Token almacenado exitosamente');
     } catch (error) {
       console.error('Error al almacenar el token:', error);
@@ -25,39 +26,33 @@ export const Login = () => {
 
   const fetchLogin = async () => {
     try {
-      const response = await fetch('https://cognito-idp.us-east-1.amazonaws.com/us-east-1_J669mhiKV/.well-known/jwks.json/', {
+      const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/cognito/crear-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-amz-json-1.1',
           'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
         },
         body: JSON.stringify({
-          AuthFlow: 'USER_PASSWORD_AUTH',
-          ClientId: '31c7pn6i9gcr04htabaog56053',
-          AuthParameters: {
-            USERNAME: emailValue,
-            PASSWORD: passValue,
-          },
+          email: emailValue,
+          password: passValue
         }),
       });
 
       if (!response.ok) throw new Error('Error en la solicitud');
 
       const data = await response.json();
-      console.log(data.AuthenticationResult.RefreshToken);
-      console.log(data.AuthenticationResult.IdToken);
       
-      const session_token = data.AuthenticationResult.AccessToken;
-      const refresh_token = data.AuthenticationResult.RefreshToken
-      const token_type = data.AuthenticationResult.TokenType
-
+      const session_token = data.acess_token;
+      const refresh_token = data.refresh_token
+      const token_type = data.token_type
+      const id_token = data.id_token
 
 
       // Handle successful login here
 
       if(session_token && refresh_token && token_type){
         Alert.alert('Login Successful', 'Welcome back!');
-        saveSessionToken(session_token,refresh_token, token_type).then(() => {
+        saveSessionToken(session_token,refresh_token, token_type,id_token).then(() => {
           router.navigate(`/(tabs)/`)
         })
       }
