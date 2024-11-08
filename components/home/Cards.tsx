@@ -95,7 +95,6 @@ const Cards = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 2,
     backgroundColor: "#fff",
   },
   scrollContent: {

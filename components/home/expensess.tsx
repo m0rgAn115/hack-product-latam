@@ -48,7 +48,7 @@ const Months_data: string[] = [
   "July", "August", "September", "October", "November", "December"
 ];
 
-const GastosComponent = () => {
+const Expensess = () => {
   const [transactionsData, setTransactions] = useState<PlaidTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -92,11 +92,11 @@ const GastosComponent = () => {
   }, []);
 
   if (isLoading) {
-    return <Text>Cargando...</Text>;
+     return <Text style={{backgroundColor: "#fff"}}>Cargando...</Text>;
   }
 
   if (error) {
-    return <Text>Error: {error.message}</Text>;
+    return <Text style={{backgroundColor: "#fff"}}>Error: {error.message}</Text>;
   }
   
   const filteredTransactionsByMonth = transactionsData.filter(transaction => {
@@ -136,101 +136,53 @@ const GastosComponent = () => {
     transactions: groupedTransactions[category as keyof typeof groupedTransactions],
     color: categoryColors[category as keyof typeof categoryColors] || '#F2E1C1',
   }));
-  
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <Header
-          onBackPress={() => console.log('Botón de retroceso presionado')}
-          onIconPress={() => navigation.navigate('subscriptions')}
-          focused={true}
-        />
+    <View style={{ backgroundColor: "#fff" }}>
+      <Text
+        style={{
+          textAlign: "center",
+          fontSize: 20,
+          fontWeight: "bold",
+          paddingTop: 32,
+          paddingBottom: 8,
+        }}>
+        Gastos
+      </Text>
+      <MonthSelector
+        mesSeleccionado={mesSeleccionado}
+        setMesSeleccionado={setMesSeleccionado}
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        Months_data={Months_data}
+      />
+      {/* <AlertCard
+                  message={`You spent $752.0 at Starbucks in ${Months_data[mesSeleccionado]}, averaging $153 per transaction.`}
+                  iconKey="coffee"
+                /> */}
 
-        <MonthSelector 
-          mesSeleccionado={mesSeleccionado}
-          setMesSeleccionado={setMesSeleccionado}
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          Months_data={Months_data}
-        />
-
-        <Text style={styles.amountText}>${totalExpenses.toFixed(2)}</Text>
-
-        <Button
-          title={showGraph ? "Hide Graph" : "Show Graph"}
-          onPress={() => setShowGraph(prev => !prev)} 
-        />
-
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {hasTransactions ? (
-            <>
-              {/* Renderizar la gráfica solo si `showGraph` es `true` */}
-              {showGraph && (
-                <GraphPerMonth transactions={transformedTransactionsForGraph} category='' />
-              )}
-
-              <AlertCard
-                message={`You spent $752.0 at Starbucks in ${Months_data[mesSeleccionado]}, averaging $153 per transaction.`}
-                iconKey='coffee'
-              />
-
-              <FlatList
-                data={groupedData}
-                keyExtractor={(item, index) => `${item.category}-${index}`}
-                renderItem={({ item }) => (
-                  <CategoryCard
-                    category={item.category || "Others"}
-                    transactions={item.transactions}
-                    onPress={() => navigation.navigate('CategoryDetail', {
-                      category: item.category,
-                      transactions: item.transactions,
-                    })}
-                    color={item.color}
-                  />
-                )}
-                scrollEnabled={false}
-              />
-            </>
-          ) : (
-            <Text style={styles.noTransactionsText}>There are no transactions for the selected month.</Text>
-          )}
-        </ScrollView>
-      </View>
-    </GestureHandlerRootView>
+      <FlatList
+        data={groupedData}
+        keyExtractor={(item, index) => `${item.category}-${index}`}
+        renderItem={({ item }) => (
+          <CategoryCard
+            category={item.category || "Others"}
+            transactions={item.transactions}
+            onPress={() =>
+              navigation.navigate("CategoryDetail", {
+                category: item.category,
+                transactions: item.transactions,
+              })
+            }
+            color={item.color}
+          />
+        )}
+        scrollEnabled={false}
+      />
+    </View>
   );
 };
 
-const Gastos = () => (
-  <GestureHandlerRootView style={{ flex: 1 }}>
-    <Stack.Navigator>
-      <Stack.Screen name="Gastos" component={GastosComponent} options={{ headerShown: false }} />
-      <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="subscriptions" component={SubscriptionsCard} options={{ headerShown: false }} />
-    </Stack.Navigator>
-  </GestureHandlerRootView>
-);
+const styles = StyleSheet.create({});
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  amountText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 15,
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  noTransactionsText: {
-    fontSize: 18,
-    color: '#888',
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-});
-
-export default Gastos;
+export default Expensess;
