@@ -2,11 +2,22 @@ import { Dimensions, View } from 'react-native';
 import React from 'react';
 import { Transaction } from '../Interfaces/transaction.interface';
 import { BarChart, LineChart } from 'react-native-chart-kit';
+import { MainCategories } from '@/components/Expenses/categoriesConfig';
+
+interface PlaidTransaction {
+  date: string;
+  amount: number;
+  logo_url?: string;
+  merchant_name?: string;
+  name: string;
+  category: string[];
+  mainCategory?: keyof MainCategories | "Others";
+}
 
 interface GraphPerMonthProps {
-  transactions: Transaction[];
+  PlaidTransaction: PlaidTransaction[];
   chart_info: {
-    transactions: Transaction[],
+    transactions: PlaidTransaction[],
     chart_type: 'barras' | 'lineas',
     categoria: string[],
     fecha_final: string,
@@ -14,24 +25,27 @@ interface GraphPerMonthProps {
   }
 }
 
-export const RenderGraphic = ({ transactions, chart_info }: GraphPerMonthProps) => {
+export const RenderGraphic = ({ PlaidTransaction, chart_info }: GraphPerMonthProps) => {
   const { categoria, fecha_inicial, fecha_final, chart_type } = chart_info;
-
+  console.log(PlaidTransaction);
   console.log(fecha_inicial, fecha_final, categoria);
 
   // Filtrar las transacciones por fecha inicial, fecha final y categoría
-  const filteredTransactions = transactions.filter(transaction => {
+  // Asegúrate de que 'categoria' es un array de strings
+  const filteredTransactions = PlaidTransaction.filter((transaction: PlaidTransaction) => {
     const transactionDate = new Date(transaction.date);
     const startDate = new Date(fecha_inicial);
     const endDate = new Date(fecha_final);
-    
+
     const isInDateRange = transactionDate >= startDate && transactionDate <= endDate;
 
-    // Ajuste aquí: verifica si la categoría está en el arreglo de categorías
-    const isCategoryMatch = categoria.includes('todos') || categoria.some(cat => transaction.category.includes(cat));
+    // Verifica si la categoría coincide con alguna en el array de 'categoria'
+    const isCategoryMatch = categoria.includes('todos') || 
+      categoria.some(cat => transaction.category.includes(cat));
 
     return isInDateRange && isCategoryMatch;
   });
+
 
   // Ordenar las transacciones filtradas por fecha y multiplicar el monto por -1
   const sortedTransactions = filteredTransactions
@@ -47,7 +61,10 @@ export const RenderGraphic = ({ transactions, chart_info }: GraphPerMonthProps) 
     if (!acc[date]) {
       acc[date] = 0;
     }
-    acc[date] += transaction.amount;
+    if (transaction.amount > 0){
+      acc[date] += transaction.amount;
+    }
+    
     return acc;
   }, {});
 

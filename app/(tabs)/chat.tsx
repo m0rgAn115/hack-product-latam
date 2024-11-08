@@ -2,11 +2,13 @@ import { Image, StyleSheet, Platform, Pressable, Text, TextInput, View, ScrollVi
 import { useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-// import ExpensesPerMonth from '../../components/Expenses/ExpensesPerMonth'; // Importa los datos
 import { Transaction } from '@/components/Interfaces/transaction.interface';
 import { RenderGraphic } from '@/components/chat/RenderGraphic';
 import GraphPerMonth from '@/components/Expenses/GraphPerMonth';
 import { Transactions_Testing } from '@/components/Expenses/Transactions_Testing';
+import { filterTransactions } from '@/components/Expenses/filterTransactions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MainCategories } from '@/components/Expenses/categoriesConfig';
 
 const fechaActual = new Date();
 
@@ -15,7 +17,7 @@ interface Conversation {
   text: string;
   msg_number: number;
   chart?: {
-    transactions: Transaction[],
+    transactions: PlaidTransaction[],
     chart_type: 'barras' | 'lineas',
     categoria: string[],
     fecha_final: string,
@@ -36,7 +38,17 @@ interface gastos_llm {
 
 }
 
-const server = 'http://127.0.0.1:5001'
+interface PlaidTransaction {
+  date: string;
+  amount: number;
+  logo_url?: string;
+  merchant_name?: string;
+  name: string;
+  category: string[];
+  mainCategory?: keyof MainCategories | "Others";
+}
+
+const server = 'http://192.168.100.52:5001'
 
 export default function ChatScreen() {
   const router = useRouter();
@@ -49,6 +61,9 @@ export default function ChatScreen() {
   const [assistant_response_state, setAssistantResponseState] = useState(false);
   const [currentAgent, setCurrentAgent] = useState<'master' | 'goal' | 'chat'>('chat');
   const [nextAgent, setNextAgent] = useState<'master' | 'goal' | 'chat' | null>(null);
+  const [transactions, setTransactions] = useState<PlaidTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const [information_completed, setinformation_completed] = useState(false)
 
@@ -60,20 +75,52 @@ export default function ChatScreen() {
     title: '',
   })
 
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/transactions/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: 'access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a',
+        }),
+      });
 
-  // const monthlyExpenses = ExpensesPerMonth[9] || [];
+      if (!response.ok) {
+        throw new Error('Error al obtener las transacciones');
+      }
 
-  // // Calcula el total de gastos del mes
-  // const totalExpenses = monthlyExpenses.reduce((sumCategory, category) => {
-  //   const totalCategory = category.transacciones.reduce((sumTransaction, transaction) => {
-  //     return sumTransaction + transaction.monto;
-  //   }, 0);
-  //   return sumCategory + totalCategory;
-  // }, 0);
-  // const transactions = monthlyExpenses.flatMap(category => category.transacciones);
+      const data: PlaidTransaction[] = await response.json();
+      const filteredData = filterTransactions(data); // Filtrar los datos aquí
+      await AsyncStorage.setItem('transactionsData', JSON.stringify(filteredData)); // Guardar los datos en AsyncStorage
+      setTransactions(filteredData); // Actualizar el estado con los datos filtrados
+    } catch (error) {
+      console.error('Error al obtener las transacciones:', error);
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  
+  const getStoredTransactions = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('transactionsData');
+      if (storedData) {
+        const parsedData: PlaidTransaction[] = JSON.parse(storedData);
+        setTransactions(parsedData);
+      } else {
+        fetchTransactions();
+      }
+    } catch (error) {
+      console.error('Error al recuperar las transacciones almacenadas:', error);
+      fetchTransactions();
+    }
+  };
 
+  useEffect(() => {
+    getStoredTransactions();
+  }, []);
 
   const handleInputValue = () => {
     if (inputValue === '') setInputValue(undefined);
@@ -83,7 +130,7 @@ export default function ChatScreen() {
 
   const fetchDataMaster = async () => {
     try {
-      const response = await fetch(`http://192.168.0.80:5001/master`, {
+      const response = await fetch(`http://192.168.100.52:5001/master`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue }),
@@ -298,9 +345,12 @@ export default function ChatScreen() {
 
   const handleSendMessage = async () => {
     if (!inputValue) return;
+    
+    const text = inputValue.toLowerCase();
+    setInputValue('');
 
     setAssistantResponseState(true);
-    setConversation(prev => [...prev, { rol: 'user', msg_number: prev.length, text: inputValue }]);
+    setConversation(prev => [...prev, { rol: 'user', msg_number: prev.length, text: text }]);
     
     const agentFunction = getAgentFunction();
     const response = await agentFunction();
@@ -311,11 +361,7 @@ export default function ChatScreen() {
         { rol: 'assistant', msg_number: prev.length, text: response },
       ]);
     
-    setInputValue('');
     setAssistantResponseState(false);
-    // console.log(conversation);
-    
-    // Solo después de completar la respuesta, actualizamos el agente si hay uno pendiente
     if (nextAgent) {
       setCurrentAgent(nextAgent);
       setNextAgent(null);
@@ -342,10 +388,11 @@ export default function ChatScreen() {
   }
 
   return (
-    <View style={{ paddingHorizontal: 30, backgroundColor: 'white', height: '100%', justifyContent: 'space-between' }}>
-      <Text style={{ fontSize: 25, color: 'black', fontWeight: '600', textAlign: 'center', marginTop: 30 }}>Welcome $user</Text>
-      <View>
-        <Text style={{ fontSize: 20, color: 'black', fontWeight: '600' }}>Funcion llamada: {funcionLlamada}</Text>
+    <View style={{ paddingHorizontal: "5%", paddingTop: "5%", backgroundColor: 'white', flex: 1 }}>
+      <View style={{ elevation: 4}}>
+        <Text style={{ fontSize: 14, textAlign: 'center', marginVertical: 30 }}>TEPOZ AI</Text>
+      </View>
+      <View style={{flex: 1}}>
         <FlatList 
           ref={flatListRef}
           data={conversation}
@@ -359,39 +406,30 @@ export default function ChatScreen() {
                                              
                                             />}
           keyExtractor={(item) => item.msg_number.toString()}
-          style={{ backgroundColor: '#ececec', padding: 20, borderRadius: 10, height: '60%' }}
+          
         />
       </View>
-      <View style={{ backgroundColor: '#ececec', borderRadius: 20, padding: 10, marginBottom: 10 }}>
-        {inputValue !== undefined && (
+
+      <View style={{ backgroundColor: '#ececec', borderRadius: 20, padding: 10, marginVertical: 10 }}>
+        <View style={{  flexDirection: 'row'}}>
           <TextInput
             ref={textInputRef}
             value={inputValue}
             onChangeText={setInputValue}
+            placeholder="Send a message..."
             multiline
-            style={{ fontSize: 20 }}
+            style={{ fontSize: 16, flex: 1, paddingHorizontal: 10 }}
             onFocus={() => console.log("Input focused")}
             onPressOut={handleInputValue}
-
           />
-        )}
-        <View style={{ justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name='mic-outline' size={25} />
-          {inputValue === undefined && (
-            <Pressable
-              style={{ flex: 1 }}
-              onPress={() => {
-                setInputValue(''); 
-                setShouldFocusInput(true); 
-              }}>
-              <Text style={{ fontSize: 18, color: '#888888', textAlign: 'left', marginLeft: 10 }}>Message</Text>
+          <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+            <Pressable 
+              onPress={handleSendMessage}
+              style={({ pressed }) => [{ opacity: pressed ? 0.3 : 1, borderRadius: 50 }]}>
+              <Ionicons name='send-sharp' size={25} style={{   }} />
             </Pressable>
-          )}
-          <Pressable 
-            onPress={handleSendMessage}
-            style={({ pressed }) => [{ opacity: pressed ? 0.3 : 1, borderRadius: 50 }]}>
-            <Ionicons name='send-sharp' size={25} style={{ opacity: inputValue === '' ? 0 : 1 }} />
-          </Pressable>
+          </View>
+
         </View>
       </View>
     </View>
@@ -404,7 +442,7 @@ interface ChatItemProps {
   last_msg_index: number;
   info_completed_state: boolean;
   onPress: () => void;
-  transactions: Transaction[]
+  transactions: PlaidTransaction[]
   showChart: boolean;
 }
 
@@ -412,21 +450,44 @@ const ChatItem = ({ item, assistant_response_state, last_msg_index, info_complet
   return (
     !item.chart ? (
       <View style={{ marginBottom: item.msg_number === last_msg_index ? 40 : (item.rol === 'user') ? 20 : 0, marginTop: ((item.rol === 'user')) ? 10 : 0 }}>
-        <Text
-          style={{
-            alignSelf: item.rol === 'user' ? 'flex-end' : 'flex-start',
-            backgroundColor: item.rol === 'user' ? 'white' : '#d3ebfe',
-            paddingHorizontal: 8,
-            paddingVertical: 5,
-            fontSize: 16,
-            borderRadius: 10,
-          }}
-        >
-          {item.text}
-        </Text>
+        { item.rol === 'assistant' ?
+          
+          <View style={{ flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 18, borderRadius: 20}}>
+            <View style={{marginRight: 10}}>
+              <View style={{width: 35, height: 35, alignItems: 'center', backgroundColor: '#20B2AA', justifyContent: 'center', borderRadius: 100 }}>
+                <Ionicons name='aperture-outline' size={25} color='white' />
+              </View> 
+            </View>
+            <View style={{flex: 1, justifyContent: 'center'}}>
+              <Text style={{ fontSize: 17.5 }}>{item.text}</Text>
+            </View>
+          </View>
+          
+          : 
+          
+          <View style={{ backgroundColor: "#ececec", flexDirection: 'row', paddingHorizontal: 18, paddingVertical: 14, borderRadius: 20}}>
+            <View style={{marginRight: 10}}>
+              <View style={{width: 35, height: 35, alignItems: 'center', backgroundColor: '#000', justifyContent: 'center', borderRadius: 100 }}>
+                <Ionicons name='wallet-outline' size={20} color='white' />
+              </View>
+            </View>
+            <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}>
+              <Text style={{ fontSize: 17.5 }}>{item.text}</Text>
+            </View>
+          </View>
+        }
 
         {assistant_response_state && item.msg_number === last_msg_index && (
-          <Text style={{ color: 'blue', fontSize: 12, marginBottom: 0 }}>Assistant is typing...</Text>
+          <View style={{ flexDirection: 'row', paddingHorizontal: 18, paddingVertical: 18, borderRadius: 20}}>
+          <View style={{marginRight: 10}}>
+            <View style={{width: 35, height: 35, alignItems: 'center', backgroundColor: '#20B2AA', justifyContent: 'center', borderRadius: 100 }}>
+              <Ionicons name='aperture-outline' size={25} color='white' />
+            </View> 
+          </View>
+          <View style={{flex: 1, flexDirection: 'column', justifyContent: 'center'}}>
+            <Text style={{ fontSize: 16 }}>TEPOZ AI is thinking...</Text>
+          </View>
+        </View>
         )}
 
         {info_completed_state && item.msg_number === last_msg_index && (
@@ -444,10 +505,11 @@ const ChatItem = ({ item, assistant_response_state, last_msg_index, info_complet
             <Text style={{ fontSize: 16, color: 'white', textAlign: 'center' }}>Create Goal</Text>
           </Pressable>
         )}
+        
       </View>
     ) : (
       <View style={{ marginBottom: (item.msg_number === last_msg_index ) ? 40 : 10, marginTop: 0}} >
-        <RenderGraphic transactions={item.chart.transactions} chart_info={item.chart} />
+        <RenderGraphic PlaidTransaction={item.chart.transactions} chart_info={item.chart} />
       </View>
     )
   );

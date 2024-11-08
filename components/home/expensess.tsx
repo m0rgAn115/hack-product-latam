@@ -14,6 +14,7 @@ import { filterTransactions } from '@/components/Expenses/filterTransactions';
 import { categoryColors } from '@/components/Expenses/CategoryCard';
 import { MainCategories } from '@/components/Expenses/categoriesConfig';
 import { mainCategories } from '@/components/Expenses/categoriesConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type RootStackParamList = {
   Gastos: undefined;
@@ -59,36 +60,53 @@ const Expensess = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/transactions/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            accessToken: 'access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a',
-          }),
-        });
-  
-        if (!response.ok) {
-          throw new Error('Error al obtener las transacciones');
-        }
-  
-        const data: PlaidTransaction[] = await response.json();
-        const filteredData = filterTransactions(data); // Filtrar los datos aquí
-        setTransactions(filteredData); // Actualizar el estado con los datos filtrados
-        setIsLoading(false);
-  
-      } catch (error) {
-        console.error('Error al obtener las transacciones:', error);
-        setError(error as Error);
-        setIsLoading(false);
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/lazy-devs-plaid/transactions/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accessToken: 'access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener las transacciones');
       }
-    };
-  
-    fetchTransactions();
+
+      const data: PlaidTransaction[] = await response.json();
+      const filteredData = filterTransactions(data); // Filtrar los datos aquí
+      await AsyncStorage.setItem('transactionsData', JSON.stringify(filteredData)); // Guardar los datos en AsyncStorage
+      setTransactions(filteredData); // Actualizar el estado con los datos filtrados
+    } catch (error) {
+      console.error('Error al obtener las transacciones:', error);
+      setError(error as Error);
+    } finally {
+      setIsLoading(false); // Se asegura de que el loading se cambie cuando la carga haya terminado
+    }
+  };
+
+  // Función para obtener las transacciones almacenadas en AsyncStorage
+  const getStoredTransactions = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('transactionsData');
+      if (storedData) {
+        const parsedData: PlaidTransaction[] = JSON.parse(storedData);
+        setTransactions(parsedData);
+      } else {
+        fetchTransactions(); // Si no hay datos almacenados, realiza el fetch
+      }
+    } catch (error) {
+      console.error('Error al recuperar las transacciones almacenadas:', error);
+      fetchTransactions(); // Si hay un error al recuperar los datos, realiza el fetch
+    }
+  };
+
+  // useEffect para cargar las transacciones al montar el componente
+  useEffect(() => {
+    getStoredTransactions();
   }, []);
 
   if (isLoading) {
