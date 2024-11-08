@@ -30,11 +30,7 @@ const Cards = () => {
   const {  setUser,saldo } = useUserStore();
   const { accessToken } = useUserStore();
   const [cards, setCards] = useState<Card[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [newCardType, setNewCardType] = useState("");
-  const [newCardAccent, setNewCardAccent] = useState("");
-  const [newCardLastDigits, setNewCardLastDigits] = useState("");
-  const [cards_db, setCards_db] = useState([]);
+
 
   useEffect(() => {
     const suma = cards.reduce((total, card) => total + card.balance, 0);
@@ -90,24 +86,24 @@ const Cards = () => {
         break;
       case "prepaid":
         card.type = "Prepagada";
-        accent = "#d1cb78";
+        accent = "#D3D3D3";
         break;
     }
 
     return (
-      <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }, {backgroundColor: accent}]}>
+      <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]}>
         <View style={[styles.accentLine, { backgroundColor: accent }]} />
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
             <View style={styles.chipContainer}>
               <View style={styles.chip} />
             </View>
-            <Text style={[styles.cardType, { color: 'white', fontWeight: "light" }]}>
+            <Text style={[styles.cardType, { fontWeight: "light" }]}>
               {card.type}
             </Text>
           </View>
           <Text style={[styles.cardNumber, { fontWeight: '600' }]}> {card.name}</Text>
-          <Text style={[styles.cardNumber, { fontSize: 14, color: '#fbff00', fontWeight: '600'}]}>... {card.id.slice(0,4)}</Text>
+          <Text style={[styles.cardNumber, { fontSize: 14, color: '#D4AF37', fontWeight: '600'}]}>... {card.id.slice(0,4)}</Text>
         </View>
       </View>
     );
@@ -210,7 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   cardType: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
   },
   cardNumber: {

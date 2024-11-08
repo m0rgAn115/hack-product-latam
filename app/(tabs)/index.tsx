@@ -5,12 +5,11 @@ import Cards from "@/components/home/Cards";
 import Balance from "@/components/home/Balance";
 import Slides from "@/components/home/Slides";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import CategoryDetailScreen from "@/components/Expenses/CategoryDetailScreen";
 import SubscriptionsCard from "@/components/Expenses/SubscriptionsCard";
-import Expensess from "@/components/home/expensess";
 import Analisis from "@/components/Summary/summary";
 
 export default function HomeScreen() {
@@ -58,13 +57,14 @@ export default function HomeScreen() {
           options={{ headerShown: false }}>
           {() => (
             <>
+              <View style={{backgroundColor: '#fff', flex: 1}}>
               <Header />
               <ScrollView>
                 <Balance />
                 <Cards />
                 <Slides />
-                <Expensess />
               </ScrollView>
+              </View>
             </>
           )}
         </Stack.Screen>
