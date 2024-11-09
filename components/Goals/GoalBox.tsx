@@ -1,54 +1,85 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useState } from 'react';
-import { opacity } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
-import { Goal } from '@/app/(tabs)/goals';
+import { Pressable, StyleSheet, Text, View, StyleProp, ViewStyle } from 'react-native';
+import React from 'react';
+
+import { LinearGradient } from 'expo-linear-gradient';
+import { parseISO, format, differenceInDays } from 'date-fns';
+import { Ionicons } from '@expo/vector-icons';
+
+import { Goal } from '@/components/Interfaces/goal';
 
 interface Component_Props {
-  goal:Goal
-  onPress: (goal:Goal) => void;
-  ContainerStyles?: {},
+  goal: Goal;
+  onPress: (goal: Goal) => void;
+  ContainerStyles?: StyleProp<ViewStyle>;
 }
 
-export const GoalBox = ({ goal,onPress,ContainerStyles }: Component_Props) => {
-
-  const { actual_amount, actual_months, title, total_amount, total_months } = goal
-  const [completedState, setcompletedState] = useState(actual_amount / total_amount === 1);
+export const GoalBox = ({ goal, onPress, ContainerStyles }: Component_Props) => {
+  const { actual_amount, title, total_amount, deadline, description} = goal;
   
-  // Calcular el porcentaje completado
-  const progressPercentage = (actual_amount / total_amount) * 100;
+  const formattedDeadline = format(parseISO(deadline), 'd MMMM yyyy');
+  const daysRemaining = differenceInDays(parseISO(deadline), new Date());
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const gradientColors = daysRemaining >= 0 ? ['#F6ECFF', '#D9B9F1'] : ['#FFA050', '#FFA07A'];
 
   return (
-    <Pressable 
-
+    <Pressable
       onPress={() => onPress(goal)}
-
-    style={({ pressed }) => [
-      styles.container, ContainerStyles,
-      { opacity: pressed ? 0.7 : 1},
-    ]}
+      style={({ pressed }) => [
+        ContainerStyles,
+        { opacity: pressed ? 0.7 : 1 },
+      ]}
+    >
+      <LinearGradient
+        colors={gradientColors}
+        start={[0, 1]}
+        end={[0, 0]}  
+        style={styles.gradient}
       >
-      <View style={{ flex: 5, padding: 5, justifyContent: 'space-around' }}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.text}>{'$' + actual_amount + ' / ' + '$' + total_amount}</Text>
-        <Text style={styles.text}>
-          {completedState ? 'Completed!' : actual_months + (actual_amount > 1 ? ' months remaining' : ' month remaining')}
-        </Text>
-        <Text style={[styles.text, { fontWeight: '700' }]}>
-          {progressPercentage.toFixed(2) + '%'}
-        </Text>
-
-        {/* Barra de progreso */}
-        <View style={styles.progressBarContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              { width: `${progressPercentage}%` },
-            ]}
-          />
+        <View style={styles.gradientSubContainer}>
+          <View style={styles.info}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.description}>{ description }</Text>
+            <Text style={styles.daysRemaining}>
+              {daysRemaining >= 0 ? `Reamining ${daysRemaining} days` : `Deadline passed by ${Math.abs(daysRemaining)} days`}
+            </Text>
+            <Text style={[styles.deadline,
+              daysRemaining < 0 && { backgroundColor: '#B22222' },
+            ]}>
+              {
+                daysRemaining >= 0
+                  ? 
+                    <>
+                      Deadline: { formattedDeadline }
+                    </>
+                  : <> { formattedDeadline } </>
+              }
+            </Text>
+          </View>
+          <View>
+            <Pressable>
+              <View style={{width: 45, height: 45, alignItems: 'center', backgroundColor: '#20B2AA', justifyContent: 'center', borderRadius: 100 }}>
+                <Ionicons name='aperture-outline' size={35} color='white' />
+              </View> 
+            </Pressable>
+          </View>
         </View>
-      </View>
-      <View style={{ flex: 2, backgroundColor: '#ffffff', borderRadius: 10 }}>
-        {/* Contenido del lado derecho */}
+      </LinearGradient>
+      
+      <View style={styles.containerAmount}>
+        <Text style={styles.amountLabel}>Amount:</Text>
+        <View style={styles.amount}>
+          <Text style={styles.amountText}>{formatCurrency(actual_amount)}</Text>
+          <Text style={styles.amountText}> / {formatCurrency(total_amount)}</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -57,38 +88,66 @@ export const GoalBox = ({ goal,onPress,ContainerStyles }: Component_Props) => {
 export default GoalBox;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#e4e4e4',
+  gradient: {
+    padding: 15,
     borderRadius: 10,
-    height: 130,
-    flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: '#a2a2a2',
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,  
   },
-  title: {
-    fontSize: 22,
-    color: 'black',
-    textAlign: 'center',
+  gradientSubContainer: {
+    flexDirection: 'row',
+  },
+  info: {
+    flex: 1,
+  },
+  title: {  
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  description: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+  },
+  deadline: {
+    marginTop: 8,
+    fontSize: 15,
+    color: '#fff',
+    backgroundColor: '#3938B3',
+    paddingHorizontal: 10,
+    paddingVertical: 5,  
+    alignSelf: 'flex-start',
+    borderRadius: 100,       
     fontWeight: '500',
   },
-  text: {
-    fontSize: 20,
-    color: 'black',
-    textAlign: 'center',
+  daysRemaining: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#000',
   },
-  progressBarContainer: {
-    height: 10, // Ajusta la altura de la barra de progreso
-    borderRadius: 5,
-    backgroundColor: '#e4e4e4', // Color del fondo de la barra
-    overflow: 'hidden', // Para que el progreso se vea redondeado
-    marginTop: 10, // Espaciado superior
-    marginHorizontal: 20,
-     borderWidth: 1,
-    borderColor: 'black'
+  containerAmount: {
+    padding: 15,
+    backgroundColor: '#F6F6F6',
+    borderBottomRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  progressBar: {
-    height: '100%', // Ocupa toda la altura del contenedor
-    backgroundColor: '#30027f', // Color de la barra de progreso
-   
+  amountLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+  },
+  amount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  amountText: {
+    fontSize: 16,
+    color: '#000',
+    fontWeight: 'bold',
   },
 });
