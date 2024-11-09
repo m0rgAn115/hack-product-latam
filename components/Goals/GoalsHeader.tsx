@@ -4,59 +4,62 @@ import RecomendationButton from '@/components/Goals/RecomendationButton';
 
 // Definición de la interfaz para las props del componente
 interface GoalsHeaderProps {
-  title: string;
-  recommendations: string[];
   onPressNewGoal: () => void;
   handlePress: (title: string) => void;
-  style?: ViewStyle;
 }
 
 export const GoalsHeader: React.FC<GoalsHeaderProps> = ({ 
-  title, 
-  recommendations, 
   onPressNewGoal, 
   handlePress, 
-  style 
 }) => {
   return (
-    <View style={[styles.container, style]}>
-      <Text style={styles.titleContainer}>{title}</Text>
-      <Pressable
-        style={({ pressed }) => [
-          styles.pressable,
-          { backgroundColor: pressed ? '#d9d9d9' : '#efefef' },
-        ]}
-        onPress={onPressNewGoal}
-      >
-        <Text style={styles.pressable_text}>New Goal +</Text>
-      </Pressable>
-
-      <ScrollView style={{ flexDirection: 'row', marginVertical: 10 }} horizontal>
-        {recommendations.map((rec, index) => (
-          <RecomendationButton key={index} titulo={rec} onPress={() => handlePress(rec)} />
-        ))}
-      </ScrollView>
+    <View style={styles.container}>
+      <View style={styles.containerTitle}>
+        <Text style={styles.titleContainer}>Your</Text>
+        <Text style={styles.titleContainerBold}>Goals</Text>
+      </View>
+      
+      <View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.pressable,
+            { backgroundColor: pressed ? '#d9d9d9' : '#000' },
+          ]}
+          onPress={onPressNewGoal}
+        >
+          <Text style={styles.pressable_text}>New Goal +</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };
 
-// Estilos para el componente
+// Estilos para el componentemarginBottom: 10,
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  containerTitle:{
+    flex: 1,
   },
   titleContainer: {
-    fontSize: 24,
+    fontSize: 18,
+  },
+  titleContainerBold: {
+    fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   pressable: {
     padding: 10,
-    borderRadius: 5,
+    paddingHorizontal: 20,
+    borderRadius: 15,
     alignItems: 'center',
   },
   pressable_text: {
     fontSize: 16,
+    color: 'white',
   },
 });
 
