@@ -1,140 +1,89 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Image, Platform, View, Text, ScrollView, Pressable, Button } from 'react-native';
-
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { StyleSheet, Text, ScrollView, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import GoalBox from '@/components/Goals/GoalBox';
 import { useRouter } from 'expo-router'; 
-import RecomendationButton from '@/components/Goals/RecomendationButton';
 
-export interface Goal {
-  title: string;
-  total_amount: number;
-  actual_amount: number;
-  total_months: number;
-  actual_months: number
-}
+import GoalsHeader from '@/components/Goals/GoalsHeader';
+import GoalBox from '@/components/Goals/GoalBox';
+import { Goal } from '@/components/Interfaces/goal';
 
-const data:Goal[] = [
+
+const data: Goal[] = [
   {
-    title: 'Vacaciones a Italia 🇮🇹',
+    title: 'Italy Vacations',
     actual_amount: 21800,
-    actual_months: 2,
-    total_months: 3,
-    total_amount: 30000
+    total_amount: 30000,
+    deadline: '2024-12-01',
+    description: 'Trip to Italy with my family'
   },
   {
-    title: '2024 AVEO SEDAN 🚙' ,
+    title: 'Aveo Sedan 2024',
     actual_amount: 180000,
-    actual_months: 5.2,
-    total_months: 6,
-    total_amount: 200000
+    total_amount: 200000,
+    deadline: '2024-12-31',
+    description: 'Car for work'
   },
   {
-    title: 'IPhone 15 📱' ,
+    title: 'IPhone 15',
     actual_amount: 21800,
-    actual_months: 2,
-    total_months: 3,
-    total_amount: 30000
+    total_amount: 30000,
+    deadline: '2025-06-22',
+    description: 'New phone'
+  },
+  {
+    title: 'Macbook Pro 2024',
+    actual_amount: 180000,
+    total_amount: 200000,
+    deadline: '2024-10-23',
+    description: 'New laptop for work'
   }
-]
+];
 
 export default function TabTwoScreen() {
-
-  const handleSelectGoal = (goal:Goal) => {
-    router.push(`/goal-details?q_goal_title=${goal.title}&q_goal_amount=${goal.total_amount}`); 
-  }
-
   const router = useRouter();
 
-  const handlePress = (texto:string|undefined) => {
-
-    // Navegar a la pantalla de objetivo
-    router.push(`/goal-details?q_goal_title=${texto}`); // Asegúrate de que la ruta coincida con el nombre del archivo
+  const handleSelectGoal = (goal: Goal): void => {
+    router.push(`/goal-details?q_goal_title=${goal.title}&q_goal_amount=${goal.total_amount}`);
   };
 
-  
+  const handlePress = (texto: string | undefined): void => {
+    router.push(`/goal-details?q_goal_title=${texto}`);
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={{ paddingHorizontal: 20 }} >
+    <SafeAreaView style={styles.container}>
+      <GoalsHeader
+        title="Recomendaciones"
+        recommendations={['Viaje a Cancún 🏖', 'Comprar un auto 🚗', 'Comprar una casa 🏠']}
+        onPressNewGoal={() => handlePress('New Goal')}
+        handlePress={handlePress}
+      />
 
-      <Text style={styles.titleContainer} >Finantial Goals</Text>
-
-      <Pressable 
-        style={({ pressed }) => [
-          styles.pressable,
-          { backgroundColor: pressed ? '#d9d9d9' : '#efefef'},
-        ]}
-        onPress={ () => handlePress('')}
-        >
-        <Text style={styles.pressable_text} >
-          New Goal +
-        </Text>
-      </Pressable>
-
-      <ScrollView style={{ flexDirection: 'row', marginVertical: 10 }} 
-        horizontal={true}
-      >
-        <RecomendationButton titulo='Quiero irme de vacaciones 🛥️'  onPress={handlePress}/>
-        <RecomendationButton titulo='Quiero comprar un carro 🚙'  onPress={handlePress}/>
-
-      </ScrollView>
-
-      <Text style={[styles.titleContainer, {marginTop: 20}]} >My Goals</Text>
-      
-        
-        {
-          data.map((goal,index) => (
-            <GoalBox key={index} onPress={handleSelectGoal} ContainerStyles={{marginVertical: 10}} goal={goal}/>
-          ))
-        }
-
-
-
-
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.titleList}>My Goals</Text>
+        {data.map((goal) => (
+          <GoalBox
+            key={goal.title} // Usar un identificador único en lugar de index
+            onPress={handleSelectGoal}
+            goal={goal}
+            ContainerStyles={{ marginBottom: 20 }}
+          />
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: 'white',
+    paddingVertical: 20,
+    paddingHorizontal: 20,
   },
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
+  titleList: {
+    marginTop: 10,
     color: 'black',
     fontSize: 22,
     fontWeight: '600',
-    textAlign: 'center'
   },
-  pressable: { 
-    borderRadius: 10,
-    backgroundColor: '#efefef',
-    height: 40,
-    width: 150,
-    justifyContent: 'center',
-    marginVertical: 15,
-    borderWidth: 1,
-    borderColor: '#c5c5c5'
-  },
-  pressable_text: {
-    color: 'black',
-    fontWeight: '600',
-    textAlign: 'center',
-    fontSize: 20,
-  }
 });

@@ -22,7 +22,6 @@ export const Login = () => {
             source={require("@/assets/images/log-reg/home.png")}
             style={styles.home_image}
           />
-          
         </View>
         <View style={styles.container}>
           <Text style={styles.title}>
