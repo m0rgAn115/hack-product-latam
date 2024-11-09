@@ -52,14 +52,11 @@ export default function TabTwoScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <GoalsHeader
-        title="Recomendaciones"
-        recommendations={['Viaje a Cancún 🏖', 'Comprar un auto 🚗', 'Comprar una casa 🏠']}
         onPressNewGoal={() => handlePress('New Goal')}
         handlePress={handlePress}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={styles.titleList}>My Goals</Text>
         {data.map((goal) => (
           <GoalBox
             key={goal.title} // Usar un identificador único en lugar de index
@@ -79,11 +76,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     paddingVertical: 20,
     paddingHorizontal: 20,
-  },
-  titleList: {
-    marginTop: 10,
-    color: 'black',
-    fontSize: 22,
-    fontWeight: '600',
   },
 });

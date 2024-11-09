@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker'; // Asegúrate de que esté correctamente importado
+import { parseISO, format, differenceInDays } from 'date-fns';
 
 import InputField from '@/components/Goals/InputField';
 import Header from '@/components/Header';
@@ -19,7 +20,21 @@ const formatCurrency = (value: string | undefined): string => {
 };
 const unformatCurrency = (value: string | undefined): string => value ? value.replace(/[^0-9.]/g, '') : '0';
 
+const calculateDaysRemaining = (targetDate: Date): number => {
+  const now = new Date();
+  const daysToGoal = differenceInDays(targetDate, now);
+  return targetDate > now ? Math.max(1, daysToGoal) : 0;
+};
 
+const calculateDailySavings = (daysToGoal: number, targetAmount: number, initialAmount: number): number => {
+  const remainingAmount = targetAmount - initialAmount;
+  return remainingAmount <= 0 ? 0 : remainingAmount / daysToGoal;
+};
+
+const getDaysText = (days: number): string => {
+  if (days === 1) return 'tomorrow';
+  return `${days} days`;
+};
 
 const GoalDetails = () => {
   const { q_goal_title, q_goal_amount, q_initial_amount, q_goal_description, q_plazo } = useLocalSearchParams();
@@ -36,20 +51,23 @@ const GoalDetails = () => {
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow); // Estado para la fecha
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false); // Estado para mostrar el picker
-
+  const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isUpdatingMonths) {
-      const monthlyAmount = parseFloat(unformatCurrency(monthlySavings));
-      const targetAmount = parseFloat(unformatCurrency(goalAmount));
-      if (monthlyAmount > 0 && targetAmount > 0) {
-        setMonthsToGoal((targetAmount / monthlyAmount).toFixed(2));
-      }
+    if (!targetDate) return;
+    
+    const daysToGoal = calculateDaysRemaining(targetDate);
+    const targetAmount = parseFloat(unformatCurrency(goalAmount));
+    const initialAmount = parseFloat(unformatCurrency(initialAmountValue));
+    
+    if (daysToGoal > 0) {
+      const dailySavings = calculateDailySavings(daysToGoal, targetAmount, initialAmount);
+      setMonthlySavings(formatCurrency(dailySavings.toFixed(2)));
+    } else {
+      setMonthlySavings('$ 0');
     }
-  }, [monthlySavings, goalAmount]);
+  }, [targetDate, goalAmount, initialAmountValue]);
 
   useEffect(() => {
     if (isUpdatingMonths) {
@@ -74,12 +92,36 @@ const GoalDetails = () => {
     router.back();
   };
 
-  const handleGoalAmountChange = (text: string) => {
-    setGoalAmount(formatCurrency(unformatCurrency(text)));
+  const handleInitialAmountChange = (text: string) => {
+    const unformattedInitial = unformatCurrency(text);
+    const unformattedGoal = unformatCurrency(goalAmount);
+    
+    // Convertir a números para comparación
+    const initialNum = parseFloat(unformattedInitial);
+    const goalNum = parseFloat(unformattedGoal);
+
+    // Si el monto inicial es mayor que el objetivo, usar el monto objetivo
+    if (initialNum > goalNum) {
+      setInitialAmountValue(goalAmount);
+    } else {
+      setInitialAmountValue(formatCurrency(unformattedInitial));
+    }
   };
 
-  const handleInitialAmountChange = (text: string) => {
-    setInitialAmountValue(formatCurrency(unformatCurrency(text)));
+  const handleGoalAmountChange = (text: string) => {
+    const unformattedGoal = unformatCurrency(text);
+    const unformattedInitial = unformatCurrency(initialAmountValue);
+    
+    // Convertir a números para comparación
+    const goalNum = parseFloat(unformattedGoal);
+    const initialNum = parseFloat(unformattedInitial);
+
+    setGoalAmount(formatCurrency(unformattedGoal));
+
+
+    if (goalNum < initialNum) {
+      setInitialAmountValue(formatCurrency(unformattedGoal));
+    }
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -87,7 +129,7 @@ const GoalDetails = () => {
     setShowDatePicker(Platform.OS === 'ios' ? true : false); // Mantenerlo abierto para iOS
     setTargetDate(currentDate);
   };
-
+      
   const inputFields = [
     {
       label: "Goal Title",
@@ -170,7 +212,8 @@ const GoalDetails = () => {
               onPress={() => {}}
             />
             <Text style={styles.calculus}>
-              Preview: You need to save {monthlySavings} monthly to reach your goal in {monthsToGoal} months.
+              Preview: You need to save {monthlySavings} per day to reach your goal {' '}
+              {targetDate ? getDaysText(calculateDaysRemaining(targetDate)) : '0 days'}
             </Text>
           </View>
 
