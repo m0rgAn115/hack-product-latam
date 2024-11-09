@@ -60,7 +60,7 @@ export default function TabTwoScreen() {
   
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView style={{ paddingHorizontal: 20 }} >
 
       <Text style={styles.titleContainer} >Finantial Goals</Text>
@@ -103,6 +103,10 @@ export default function TabTwoScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff'
+  },
   headerImage: {
     color: '#808080',
     bottom: -90,
@@ -110,8 +114,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   titleContainer: {
+    marginTop: 20,
     flexDirection: 'row',
-    gap: 8,
     color: 'black',
     fontSize: 22,
     fontWeight: '600',
