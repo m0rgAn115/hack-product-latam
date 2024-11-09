@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, ViewStyle } from 'react-native';
 import RecomendationButton from '@/components/Goals/RecomendationButton';
 
-// Definición de la interfaz para las props del componente
 interface GoalsHeaderProps {
   onPressNewGoal: () => void;
   handlePress: (title: string) => void;
@@ -30,11 +29,11 @@ export const GoalsHeader: React.FC<GoalsHeaderProps> = ({
           <Text style={styles.pressable_text}>New Goal +</Text>
         </Pressable>
       </View>
+
     </View>
   );
 };
 
-// Estilos para el componentemarginBottom: 10,
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',

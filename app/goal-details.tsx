@@ -51,10 +51,8 @@ const GoalDetails = () => {
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-
   const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-
 
   useEffect(() => {
     if (!targetDate) return;
@@ -70,8 +68,6 @@ const GoalDetails = () => {
       setMonthlySavings('$ 0');
     }
   }, [targetDate, goalAmount, initialAmountValue]);
-  
-  
 
   useEffect(() => {
     if (isUpdatingMonths) {
@@ -133,9 +129,7 @@ const GoalDetails = () => {
     setShowDatePicker(Platform.OS === 'ios' ? true : false); // Mantenerlo abierto para iOS
     setTargetDate(currentDate);
   };
-
-  
-
+      
   const inputFields = [
     {
       label: "Goal Title",
