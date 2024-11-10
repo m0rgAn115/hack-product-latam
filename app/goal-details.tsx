@@ -39,8 +39,11 @@ const getDaysText = (days: number): string => {
 const GoalDetails = () => {
   const { q_goal_title, q_goal_amount, q_initial_amount, q_goal_description, q_plazo } = useLocalSearchParams();
   const router = useRouter();
+  
 
   const initialGoalTitle = Array.isArray(q_goal_title) ? q_goal_title[0] : q_goal_title || 'New Goal';
+  console.log( "COMPONENTE", initialGoalTitle);
+
   const [goalTitle, setGoalTitle] = useState<string>(initialGoalTitle);
   const [goalAmount, setGoalAmount] = useState<string>(formatCurrency(Array.isArray(q_goal_amount) ? q_goal_amount[0] : q_goal_amount || '0'));
   const [initialAmountValue, setInitialAmountValue] = useState<string>(formatCurrency(Array.isArray(q_initial_amount) ? q_initial_amount[0] : q_initial_amount || '0'));

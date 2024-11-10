@@ -3,7 +3,7 @@ import PlaidLink from '@/components/Plaid/PlaidLink'
 import { View, Alert, Text } from 'react-native';
 import useGetTokens from '@/hooks/useGetTokens';
 import useFetch from '@/hooks/useFetch';
-import { useUserStore } from './store/useUserStore';
+import { useUserStore } from '@/store/useUserStore';
 import { router } from 'expo-router';
 
 const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/';
