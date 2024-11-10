@@ -1,3 +1,4 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
@@ -16,6 +17,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({ text, backgroundColor, onPr
       onPress={onPress}
     >
       <Text style={[styles.buttonText, textStyle]}>{text}</Text>
+      <AntDesign name="arrowright" size={24} color="white" />
     </TouchableOpacity>
   );
 };
@@ -27,11 +29,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+    marginRight: 10,
   },
 });
 

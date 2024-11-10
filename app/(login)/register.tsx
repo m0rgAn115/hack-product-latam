@@ -14,8 +14,9 @@ export const Login = () => {
 
   const [emailValue, setEmailValue] = useState('');
   const [passValue, setPassValue] = useState('');
+  const [confirmPassValue, setConfirmPassValue] = useState('');
+  const [nameValue, setNameValue] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingUser, setLoadingUse] = useState(false);
   const [errorSession, setErrorSession] = useState('');
 
   const inputFields: {
@@ -27,6 +28,14 @@ export const Login = () => {
     caption: string;
     secureTextEntry: boolean;
   }[] = [
+    {
+      label: 'Full name',
+      value: nameValue,
+      onChangeText: setNameValue,
+      placeholder: 'John Doe',
+      secureTextEntry: false,
+      caption: 'Name',
+    },
     {
       label: 'Email',
       value: emailValue,
@@ -40,7 +49,15 @@ export const Login = () => {
       label: 'Password',
       value: passValue,
       onChangeText: setPassValue,
-      placeholder: 'example...',
+      placeholder: 'password',
+      secureTextEntry: true,
+      caption: 'Password',
+    },
+    {
+      label: 'Confirm password',
+      value: confirmPassValue,
+      onChangeText: setConfirmPassValue,
+      placeholder: 'password',
       secureTextEntry: true,
       caption: 'Password',
     },
@@ -57,22 +74,21 @@ export const Login = () => {
     }
   };
 
-  const setDemoUser = async () => {
-    setLoadingUse(true);
-    setEmailValue('damianmor3005@gmail.com');
-    setPassValue('Moar758849@');
-    setLoadingUse(false);
-  };
-
-  const fetchLogin = async () => {
-    if (!emailValue || !passValue) {
-      setErrorSession('Please enter an email and a password.');
+  const registerUser = async () => {
+    if (!emailValue || !passValue || !confirmPassValue || !nameValue) {
+      setErrorSession('Please fill all the fields.');
       return;
     }
 
+    if (passValue !== confirmPassValue) {
+      setErrorSession('Passwords do not match.');
+      return;
+    } 
+    
     setLoading(true);
 
     try {
+      // Aquí deberías hacer la solicitud al backend para registrar al usuario
       const response = await fetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/cognito/crear-token', {
         method: 'POST',
         headers: {
@@ -88,7 +104,6 @@ export const Login = () => {
       if (!response.ok) throw new Error('Error en la solicitud');
 
       const data = await response.json();
-
       const { access_token, refresh_token, token_type, id_token } = data;
 
       if (access_token && refresh_token && token_type) {
@@ -113,11 +128,11 @@ export const Login = () => {
 
         router.navigate(`/(tabs)/`);
       } else {
-        setErrorSession('Please check your email and password, or try again later.');
+        setErrorSession('Please try again later.');
       }
     } catch (error) {
       console.error('Error:', error);
-      setErrorSession('Please check your email and password, or try again later.');
+      setErrorSession('Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -132,19 +147,17 @@ export const Login = () => {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={0}
         >
-          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} showsVerticalScrollIndicator={false}>
             <View style={styles.cont}>
-              <Image
-                source={require('@/assets/images/log-reg/backLog.png')}
+              <Image 
+                source={require('@/assets/images/log-reg/new.png')}
                 style={styles.login_image}
               />
             </View>
-
             <View style={styles.container}>
               <Text style={styles.title}>
-                Welcome back! {"\n"}Sign in to your account
+                Track and save today!{'\n'}Create an account
               </Text>
-
               {inputFields.map((field, index) => (
                 <InputField
                   key={index}
@@ -156,19 +169,17 @@ export const Login = () => {
                   secureTextEntry={field.secureTextEntry}
                 />
               ))}
-
               {errorSession !== '' && (
                 <Text style={{ color: 'red', opacity: 0.6, fontSize: 12 }}>
                   {errorSession}
                 </Text>
               )}
-
               <Pressable
                 style={({ pressed }) => [
                   styles.loginButton,
                   { opacity: pressed ? 0.8 : 1 },
                 ]}
-                onPress={fetchLogin}
+                onPress={registerUser}
                 disabled={loading}
               >
                 {loading ? (
@@ -177,34 +188,17 @@ export const Login = () => {
                   </View>
                 ) : (
                   <View style={styles.button}>
-                    <Text style={styles.loginText}>Sign in</Text>
+                    <Text style={styles.loginText}>Create a new account</Text>
                   </View>
                 )}
               </Pressable>
-
               <Pressable
                 style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
-                onPress={() => router.navigate(`/register`)}
+                onPress={() => router.navigate(`/login`)}
                 disabled={loading}
               >
-                <Text style={styles.registerText}>Create a new account</Text>
+                <Text style={styles.registerText}>Already have an account</Text>
               </Pressable>
-
-              <View style={styles.demoCont}>
-                <Text style={styles.try}>
-                  Try our demo user:
-                </Text>
-                <Pressable
-                  style={({ pressed }) => [
-                    styles.loginButtonDemo,
-                    { opacity: pressed ? 0.2 : 1 },
-                  ]}
-                  onPress={setDemoUser}
-                  disabled={loadingUser}
-                >
-                  <Text style={styles.demoText}>Demo account</Text>
-                </Pressable>
-              </View>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -217,11 +211,11 @@ const styles = StyleSheet.create({
   supContainer: {
     flex: 1,
     backgroundColor: 'white',
-    paddingVertical: 20,
+    paddingTop: 20,
     paddingHorizontal: 20,
   },
   cont: {
-    height: 250,
+    height: 150, // Tamaño fijo para la imagen
     width: '100%',
   },
   login_image: {
@@ -256,32 +250,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 5,
   },
-  loginButtonDemo: {
-    width: "100%",
-    paddingVertical: 10,
-    alignSelf: 'center',
-    borderRadius: 5,
-  },
   loginText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  demoText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
-  demoCont: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  try: {
-    fontSize: 15,
-    color: '#000',
-    marginRight: 8,
   },
   registerText: {
     color: '#000',
