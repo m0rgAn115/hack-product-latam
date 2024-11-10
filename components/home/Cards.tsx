@@ -27,8 +27,7 @@ const CARD_WIDTH = width * 0.4;
 const CARD_HEIGHT = CARD_WIDTH * 1.1;
 
 const Cards = () => {
-  const {  setUser,saldo } = useUserStore();
-  const { accessToken } = useUserStore();
+  const {  setUser, correo } = useUserStore();
   const [cards, setCards] = useState<Card[]>([]);
 
 
@@ -37,40 +36,29 @@ const Cards = () => {
     setUser({ ...useUserStore.getState(), saldo: suma });
     
   }, [cards])
-  
-  
 
   useEffect(() => {
-    const fetchCardsForTokens = async () => {
-      const fetchedCards: Card[] = [];
-
-      for (const token of accessToken) {
-        const data = await useFetch('https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards', {
-          accessToken: token,
-        }, 'POST');
-
-        
-
-        const newCards = data.map((card: any) => ({
-          id: card.account_id,
-          balance: card.balances.current,
-          name: card.name,
-          type: card.type,
-          accent: card.accent,
-        }));
-
-        fetchedCards.push(...newCards);
-      }
-
-      // Actualizamos el estado de cards evitando duplicados
-      const uniqueCards = fetchedCards.filter((card, index, self) =>
-        index === self.findIndex((c) => c.id === card.id)
-      );
-      setCards(uniqueCards);
-    };
-
-    fetchCardsForTokens();
-  }, [accessToken]);
+    if (correo) {
+      const fetchCardsForTokens = async () => {
+        await useFetch(
+          'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards/email',
+          { correo },
+          'POST'
+        ).then((data) => {
+          const newCards = data.cuentas.map((card: any) => ({
+            id: card.account_id,
+            balance: card.balances.current,
+            name: card.name,
+            type: card.type,
+            accent: card.accent,
+          }));
+          setCards(newCards);
+        });
+      };
+      fetchCardsForTokens();
+    }
+  }, [correo]);
+  
 
   const CardComponent = (card: Card) => {
     let accent = "#ffffff";
