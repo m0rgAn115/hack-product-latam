@@ -12,16 +12,6 @@ const useFetch = async (endpoint: string, body:any, method:'POST'|'GET'|'PUT') =
     if (tokens?.id_token) {
       const id_token = tokens.id_token;
 
-      // const es_valido = await useValidateToken(id_token)
-
-      // if(!es_valido)
-      //   useRefreshToken().catch((error) => {
-      //     console.error('Error al actualizar el token:', error);
-      //     router.navigate(`/(login)`)
-      //     Alert.alert("Sesion caducada", "Inicie sesion de nuevo.")
-      //     return undefined
-      //   })
-
       // Make the fetch request
       const response = await fetch(endpoint, {
         method: method,
@@ -36,9 +26,6 @@ const useFetch = async (endpoint: string, body:any, method:'POST'|'GET'|'PUT') =
 
       // Parse the response
       const data = await response.json();
-
-      console.log(data);
-      
 
       return data
       
