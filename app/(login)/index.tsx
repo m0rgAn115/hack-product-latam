@@ -25,24 +25,19 @@ export const Login = () => {
         </View>
         <View style={styles.container}>
           <Text style={styles.title}>
-            Upgrade plan to highly experience
+            Easy ways to track and understand your finances
           </Text>
           <Text style={styles.description}>
-            Take control of your money: track expenses, visualize finances, and make smarter decisions!
+            Start now and take control of your finances
           </Text>
           <View style={styles.buttons}>
             <CustomButton
-              text="Login"
+              text="Get Started"
               backgroundColor="#000"
               onPress={() => handlePress(router)}
+              buttonStyle={{ paddingVertical: 12, borderRadius: 100 }}
             />
-            <CustomButton
-              text="Register"
-              backgroundColor="#FFF"
-              onPress={() => handlePress(router)}
-              textStyle={{ color: "#000" }}
-              buttonStyle={{ marginTop: 10, borderWidth: 1, borderColor: "#000" }}
-            />
+            
           </View>
         </View>
       </SafeAreaView>
@@ -62,13 +57,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 25,
+    fontSize: 32,
     fontWeight: 'bold',
     paddingTop: 20,
   },
   description: {
     marginTop: 10,
     fontSize: 16,
+    color: 'gray',
   },
   imageCont: {
     height: '50%',
