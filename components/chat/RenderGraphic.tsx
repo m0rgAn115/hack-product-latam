@@ -1,8 +1,10 @@
-import { Dimensions, View } from 'react-native';
+import { Dimensions, View, Text } from 'react-native';
 import React from 'react';
-import { Transaction } from '../Interfaces/transaction.interface';
-import { BarChart, LineChart } from 'react-native-chart-kit';
+import { useState } from 'react';
+import { LineChart } from 'react-native-chart-kit';
 import { MainCategories } from '@/components/Expenses/categoriesConfig';
+import { BarChart } from 'react-native-gifted-charts';
+
 
 interface PlaidTransaction {
   date: string;
@@ -27,6 +29,7 @@ interface GraphPerMonthProps {
 
 export const RenderGraphic = ({ PlaidTransaction, chart_info }: GraphPerMonthProps) => {
   const { categoria, fecha_inicial, fecha_final, chart_type } = chart_info;
+  const [containerWidth, setContainerWidth] = useState(0);
   console.log(PlaidTransaction);
   console.log(fecha_inicial, fecha_final, categoria);
 
@@ -58,7 +61,7 @@ export const RenderGraphic = ({ PlaidTransaction, chart_info }: GraphPerMonthPro
   // Agrupar gastos por día
   const expensesByDay = sortedTransactions.reduce((acc: { [date: string]: number }, transaction) => {
     const date = transaction.date;
-    if (!acc[date]) {
+    if (!acc[date] && transaction.amount > 0) {
       acc[date] = 0;
     }
     if (transaction.amount > 0){
@@ -68,11 +71,32 @@ export const RenderGraphic = ({ PlaidTransaction, chart_info }: GraphPerMonthPro
     return acc;
   }, {});
 
+  console.log(expensesByDay);
+
   // Obtener las fechas para el eje X
   const dates = Object.keys(expensesByDay).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   const days = dates.map(date => new Date(date).getUTCDate().toString());
 
-  console.log(filteredTransactions);
+  const monthNames = [
+    "Ene", "Feb", "Mar", "Abr", "May", "Jun", 
+    "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+  ];
+  
+  const barData = Object.entries(expensesByDay).map(([date, value]) => {
+    const dateObj = new Date(date);
+    const day = dateObj.getUTCDate().toString(); // Obtiene el día del mes
+    const month = monthNames[dateObj.getUTCMonth()]; // Obtiene el nombre del mes
+  
+    // Combina el día y el mes como etiqueta
+    const dayMonthLabel = `${day} ${month}`; // Ejemplo: '10 Junio'
+  
+    return {
+      value,
+      label: dayMonthLabel,
+    };
+  });
+
+  console.log(barData);
 
   // Preparar los datos para la gráfica
   const chartData = {
@@ -125,40 +149,97 @@ export const RenderGraphic = ({ PlaidTransaction, chart_info }: GraphPerMonthPro
       )}
 
       {chart_type === 'barras' && (
-        <BarChart
-          data={chartData}
-          width={Dimensions.get('window').width - 110}
-          height={170}
-          yAxisLabel="$"
-          yAxisSuffix=""
-          yAxisInterval={1}
-          fromZero
-          chartConfig={{
-            backgroundColor: '#ffffff',
-            backgroundGradientFrom: '#ffffff',
-            backgroundGradientTo: '#ffffff',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(98, 0, 238, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            style: {
-              borderRadius: 16,
-              borderColor: '#d3ebfe'
-            },
-            propsForBackgroundLines: {
-              offsetX: 20,
-            },
-            propsForDots: {
-              r: '4',
-              strokeWidth: '2',
-              stroke: '#6200EE',
-            },
-          }}
-          style={{
-            marginTop: 0,
-            marginBottom: 0,
-            borderRadius: 16,
-          }}
-        />
+        
+        <View
+      style={{
+        margin: 10,
+        padding: 16,
+        borderRadius: 20,
+        backgroundColor: '#ffffff',
+      }}
+      onLayout={(event) => {
+        const {width} = event.nativeEvent.layout;
+        setContainerWidth(width);
+      }}>
+      <Text style={{color: 'black', fontSize: 16, fontWeight: 'bold'}}>
+        Resumen de gastos
+      </Text>
+      <View style={{padding: 20}}>
+        {containerWidth > 0 && (
+          <BarChart
+            data={barData}
+            width={containerWidth - 125}
+            height={300}
+            barWidth={40}
+            spacing={2}
+            xAxisThickness={1}
+            yAxisThickness={0}
+            yAxisTextStyle={{color: 'black'}}
+            xAxisLabelTextStyle={{color: 'black'}}
+            labelWidth={40}
+            yAxisLabelWidth={60}
+            noOfSections={7}
+            isAnimated={true}
+            // barBorderRadius={7}
+            barBorderBottomRightRadius={0}
+            barBorderBottomLeftRadius={0}
+            yAxisLabelPrefix="$"
+            rotateLabel={true}
+            frontColor="#20B2AA"
+            renderTooltip={(item, index) => {
+              return (
+                <View style={{
+                  backgroundColor: 'black',
+                  padding: 10,
+                  borderRadius: 4,
+                }}>
+                  <Text style={{
+                    color: 'white',
+                    fontSize: 14,
+                  }}>${item.value}</Text>
+                </View>
+              );
+            }}
+          />
+        )}
+      </View>
+    </View>
+      
+
+        // <BarChart
+        //   data={chartData}
+        //   width={Dimensions.get('window').width - 110}
+        //   height={170}
+        //   yAxisLabel="$"
+        //   yAxisSuffix=""
+        //   yAxisInterval={1}
+        //   fromZero
+        //   chartConfig={{
+        //     backgroundColor: '#ffffff',
+        //     backgroundGradientFrom: '#ffffff',
+        //     backgroundGradientTo: '#ffffff',
+        //     decimalPlaces: 0,
+        //     color: (opacity = 1) => `rgba(98, 0, 238, ${opacity})`,
+        //     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+        //     style: {
+        //       borderRadius: 16,
+        //       borderColor: '#d3ebfe'
+        //     },
+        //     propsForBackgroundLines: {
+        //       offsetX: 20,
+        //     },
+        //     propsForDots: {
+        //       r: '4',
+        //       strokeWidth: '2',
+        //       stroke: '#6200EE',
+        //     },
+        //   }}
+        //   style={{
+        //     marginTop: 0,
+        //     marginBottom: 0,
+        //     borderRadius: 16,
+        //   }}
+        // />
       )}
     </View>
   );
