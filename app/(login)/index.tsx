@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter, Router } from 'expo-router';
 
 const handlePress = (router: Router) => {
-  router.navigate(`/login`);
+  router.replace(`/login`);
 };
 
 export const Login = () => {

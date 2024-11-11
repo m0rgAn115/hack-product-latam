@@ -5,17 +5,22 @@ import useGetTokens from '@/hooks/useGetTokens';
 import useFetch from '@/hooks/useFetch';
 import { useUserStore } from '@/store/useUserStore';
 import { router, useRouter } from 'expo-router';
+import { useCardsStore } from '@/store/useCardStore';
+
 
 const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/';
 
 export default function PlaidShow() {
   const [linkToken, setLinkToken] = useState(null);
   const { correo } = useUserStore(); 
+
   const router = useRouter();
 
   const handleKick = () => {
     router.navigate('/(tabs)')
   }
+
+  const { setCards } = useCardsStore()
 
   useEffect(() => {
     const createLinkToken = async () => {
@@ -59,7 +64,7 @@ export default function PlaidShow() {
     return <Text>Loading...</Text>;
   }
 
-  const handleSuccess = async (success) => {
+  const handleSuccess = async (success:any) => {
       const tokens = await useGetTokens()
     if (!tokens?.id_token) {
         throw new Error('No authorization token available');
@@ -98,11 +103,14 @@ export default function PlaidShow() {
         },
         'PUT'
       ).then((res) => {
+        fetchCardsForTokens(correo)
         Alert.alert(
           'Account Connected',
           'The account was connected successfully!',
           [{ text: 'OK' }]
+
         );
+        
         router.navigate('/(tabs)')
       })
 
@@ -117,13 +125,33 @@ export default function PlaidShow() {
 
   };
 
+  const fetchCardsForTokens = async (correo:string) => {
+    await useFetch(
+      'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards/email',
+      { correo },
+      'POST'
+    ).then((data) => {
+      const newCards = data.cuentas.map((card: any) => ({
+        id: card.account_id,
+        balance: card.balances.current,
+        name: card.name,
+        type: card.type,
+        accent: card.accent,
+      }));
+      setCards(newCards);
+    });
+  };
+
   return (
     
     <PlaidLink
       linkToken={linkToken}
-      onEvent={(event) => console.log('Plaid event:', event)}
-      onExit={(exit) => handleKick()}
-      onSuccess={(success) => handleSuccess(success)}
+      onEvent={(event: any) => console.log('Plaid event:', event)}
+      onExit={(exit: any) => handleKick()}
+      onSuccess={(success: any) => handleSuccess(success)}
+      onEvent={(event:any) => console.log('Plaid event:', event)}
+      onExit={(exit:any) => console.log('Plaid exit:', exit)}
+      onSuccess={(success:any) => handleSuccess(success)}
     />
   )
 }
