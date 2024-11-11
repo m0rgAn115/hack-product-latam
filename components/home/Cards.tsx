@@ -1,6 +1,6 @@
-import { useUserStore } from "@/app/store/useUserStore";
 import useFetch from "@/hooks/useFetch";
 import useGetTokens from "@/hooks/useGetTokens";
+import { useUserStore } from "@/store/useUserStore";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {

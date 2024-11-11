@@ -1,4 +1,4 @@
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { PieChart } from "react-native-gifted-charts";

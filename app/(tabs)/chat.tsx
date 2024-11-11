@@ -10,8 +10,9 @@ import { filterTransactions } from '@/components/Expenses/filterTransactions';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MainCategories } from '@/components/Expenses/categoriesConfig';
 import useFetch from '@/hooks/useFetch';
-import { useUserStore } from '../store/useUserStore';
 import { Try } from 'expo-router/build/views/Try';
+import { Goal } from '@/components/Interfaces/goal';
+import { useUserStore } from '@/store/useUserStore';
 
 const fechaActual = new Date();
 
@@ -65,6 +66,8 @@ export default function ChatScreen() {
   const [nextAgent, setNextAgent] = useState<'master' | 'goal' | 'chat' | null>(null);
   const [transactions, setTransactions] = useState<PlaidTransaction[]>([]);
   const { correo } = useUserStore();
+
+  const [goal_details, setgoal_details] = useState<Goal>()
 
   const [information_completed, setinformation_completed] = useState(false)
 
@@ -133,7 +136,7 @@ export default function ChatScreen() {
   const switch_agent = (funcion:string, user_msg:string) => {
     switch(funcion){
       case "crear_meta_financiera":
-        setCurrentAgent('goal')
+        GoalAgent(user_msg)
         return false
       
       case "analisis_gastos":
@@ -237,6 +240,54 @@ export default function ChatScreen() {
     }
   };
 
+  const GoalAgent = async (user_msg:string) => {
+
+    try {
+      const data = await useFetch(`${server}/goal`,
+        {
+          "user_input": user_msg,
+          "date": fechaActual.toString(),
+          "previous_chats": conversation
+        },
+        'POST'
+      )
+
+      console.log("datos de analiticas: ",data.missing_fields);
+
+      
+      if (!data.respuesta) throw new Error('Error en la solicitud: ', data);
+
+      const { q_goal_title, q_goal_amount, q_goal_description, goal_validation,q_deadline } = data.respuesta
+
+
+      setConversation(prev => [
+        ...prev,
+        { rol: 'assistant', msg_number: prev.length, text: goal_validation.suggested_questions[0],
+         },
+      ]);
+
+      if(goal_validation.is_valid){
+        setgoal_details({
+          actual_amount: 0,
+          description: q_goal_description,
+          deadline: q_deadline,
+          title: q_goal_title,
+          total_amount: q_goal_amount
+        })
+        setinformation_completed(true)
+      }
+
+      setagentAvailable(true)
+      setAssistantResponseState(false)
+
+    } catch (error) {
+      setagentAvailable(true)
+      setAssistantResponseState(false)
+      console.error('Error:', error);
+      return "Lo siento, hubo un error en la conversación.";
+    }
+  };
+
   useEffect(() => {
     if (shouldFocusInput && textInputRef.current) {
       textInputRef.current.focus();
@@ -274,9 +325,10 @@ export default function ChatScreen() {
   }, [conversation]);
 
   const handleGoalCompleted = () => {
-    const { amount, description, initial, plazo, title } = goal;
+    console.log(goal_details);
+    
 
-    router.push(`/goal-details?q_goal_title=${title}&q_goal_amount=${amount}&q_initial_amount=${initial}&q_goal_description=${description}&q_plazo=${plazo}`)
+    router.push(`/goal-details?q_goal_title=${goal_details?.title}&q_goal_amount=${goal_details?.total_amount}&q_initial_amount=${goal_details?.actual_amount}&q_goal_description=${goal_details?.description}&q_plazo=${goal_details?.deadline}`)
 
   }
 

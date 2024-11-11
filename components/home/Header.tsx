@@ -1,6 +1,6 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 
