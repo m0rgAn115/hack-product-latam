@@ -459,10 +459,9 @@ export default function ChatScreen() {
 
               />
               <Text >New Chat</Text>
-
             </Pressable>
-            
         <Text style={{ fontSize: 14, textAlign: "center", marginVertical: 30 }}>
+
           TEPOZ AI
         </Text>
       </View>

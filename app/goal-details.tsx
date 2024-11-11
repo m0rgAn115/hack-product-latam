@@ -207,9 +207,8 @@ const [targetDate, setTargetDate] = useState<Date>(parsedDate);
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={ initialGoalTitle } />
-      
       <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+        <Header title={ initialGoalTitle } />
         <View>
           
           {inputFields.map((field, index) => (

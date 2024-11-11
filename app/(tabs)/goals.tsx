@@ -55,13 +55,12 @@ export default function TabTwoScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <GoalsHeader
-        onPressNewGoal={() => handlePress('New Goal')}
-        handlePress={handlePress}
-      />
-
       <ScrollView showsVerticalScrollIndicator={false}>
-        {goals.map((goal) => (
+        <GoalsHeader
+          onPressNewGoal={() => handlePress('New Goal')}
+          handlePress={handlePress}
+        />
+        {data.map((goal) => (
           <GoalBox
             key={goal.title} // Usar un identificador único en lugar de index
             onPress={handleSelectGoal}
@@ -78,7 +77,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    paddingVertical: 20,
     paddingHorizontal: 20,
   },
 });

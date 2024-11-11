@@ -42,7 +42,10 @@ export default function HomeScreen() {
           options={{ headerShown: false }}>
           {() => (
             <>
-              <View style={{ backgroundColor: "#fff", flex: 1 }}>
+              <View style={{ backgroundColor: "#fff", 
+                              flex: 1, 
+                              paddingVertical: "5%"
+                }}>
                 <Header />
                 {/* <ScrollView> */}
                 <Balance />
