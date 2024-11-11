@@ -2,6 +2,7 @@ import { useUserStore } from "@/store/useUserStore";
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
+import BalanceSkeleton from "./BalanceSkeleton";
 
 const Balance = () => {
   const porcent = "16.8%";
@@ -28,57 +29,68 @@ const Balance = () => {
   ];
 
   return (
-    <View style={styles.balance}>
-      <View>
-        <Text>Your total balance</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Text style={{ fontWeight: "bold", fontSize: 22 }}>${saldo}</Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: "#34eb4c",
-              //   backgroundColor: "#34eb4c",
-              paddingHorizontal: 8,
-              paddingVertical: 2,
-              borderRadius: 14,
-            }}>
-            <Text style={{ color: "#34eb4c" }}>{porcent}</Text>
-          </View>
-        </View>
-      </View>
-
-      <View>
-        <PieChart
-          data={pieData}
-          donut
-          showGradient
-          sectionAutoFocus
-          // focusOnPress
-          semiCircle
-          radius={70}
-          innerRadius={55}
-          innerCircleColor={"#fff"}
-          centerLabelComponent={() => {
-            return (
+    <>
+      {saldo ? (
+        <>
+          <View style={styles.balance}>
+            <View>
+              <Text>Your total balance</Text>
               <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}>
-                <Text
-                  style={{
-                    fontSize: 22,
-                    color: "black",
-                    fontWeight: "bold",
-                  }}>
-                  47%
+                style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Text style={{ fontWeight: "bold", fontSize: 22 }}>
+                  ${saldo}
                 </Text>
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#34eb4c",
+                    //   backgroundColor: "#34eb4c",
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 14,
+                  }}>
+                  <Text style={{ color: "#34eb4c" }}>{porcent}</Text>
+                </View>
               </View>
-            );
-          }}
-        />
-      </View>
-    </View>
+            </View>
+
+            <View>
+              <PieChart
+                data={pieData}
+                donut
+                showGradient
+                sectionAutoFocus
+                // focusOnPress
+                semiCircle
+                radius={70}
+                innerRadius={55}
+                innerCircleColor={"#fff"}
+                centerLabelComponent={() => {
+                  return (
+                    <View
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 22,
+                          color: "black",
+                          fontWeight: "bold",
+                        }}>
+                        47%
+                      </Text>
+                    </View>
+                  );
+                }}
+              />
+            </View>
+          </View>
+        </>
+      ) : (
+        <BalanceSkeleton />
+      )}
+    </>
   );
 };
 

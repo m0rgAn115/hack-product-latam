@@ -13,13 +13,14 @@ import {
   TouchableOpacity,
   Platform,
 } from "react-native";
+import SkeletonLoader from "./CardSkeleton";
 
 export type Card = {
-  id: string,
-  balance: number,
-  name: string,
-  type: string,
-  accent: string,
+  id: string;
+  balance: number;
+  name: string;
+  type: string;
+  accent: string;
 };
 
 const { width } = Dimensions.get("window");
@@ -27,18 +28,17 @@ const CARD_WIDTH = width * 0.4;
 const CARD_HEIGHT = CARD_WIDTH * 1.1;
 
 const Cards = () => {
-  const {  setUser, correo } = useUserStore();
+  const { setUser, correo } = useUserStore();
 
-  const { cards } = useCardsStore()
-  const isFocused = useIsFocused()
-
+  const { cards } = useCardsStore();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const suma = cards.reduce((total, card) => total + card.balance, 0);
     setUser({ ...useUserStore.getState(), saldo: suma });
-    
-  }, [cards])
-
+    // console.log("cards", cards);
+    // console.log(cards.length);
+  }, [cards]);
 
   const CardComponent = (card: Card) => {
     let accent = "#ffffff";
@@ -70,12 +70,23 @@ const Cards = () => {
               {card.type}
             </Text>
           </View>
-          <Text style={[styles.cardNumber, { fontWeight: '600' }]}> {card.name}</Text>
-          <Text style={[styles.cardNumber, { fontSize: 14, color: '#D4AF37', fontWeight: '600'}]}>... {card.id.slice(0,4)}</Text>
+          <Text style={[styles.cardNumber, { fontWeight: "600" }]}>
+            {" "}
+            {card.name}
+          </Text>
+          <Text
+            style={[
+              styles.cardNumber,
+              { fontSize: 14, color: "#D4AF37", fontWeight: "600" },
+            ]}>
+            ... {card.id.slice(0, 4)}
+          </Text>
         </View>
       </View>
     );
   };
+
+  console.log("hola", cards.length);
 
   return (
     <>
@@ -86,23 +97,27 @@ const Cards = () => {
           showsHorizontalScrollIndicator={false}
           decelerationRate="fast"
           snapToInterval={CARD_WIDTH + 20}
-          contentContainerStyle={styles.scrollContent}
-        >
+          contentContainerStyle={styles.scrollContent}>
           <TouchableOpacity
-            onPress={() => router.navigate('/webview')}
-            style={[styles.cardContainer, styles.addCardButton]}
-          >
+            onPress={() => router.navigate("/webview")}
+            style={[styles.cardContainer, styles.addCardButton]}>
             <Text style={styles.plusIcon}>+</Text>
           </TouchableOpacity>
 
-          {cards ? cards.map((card) => (
-            <View key={card.id} style={styles.cardContainer}>
-              <CardComponent {...card} />
-            </View>
-          ))
-          : 
-            <Text style={{ color: 'black' }} >Cargando tarjetas...</Text>
-        }
+          {cards.length == 0 ? (
+            <>
+              {/* <Text style={{ color: "black" }}>Cargando tarjetas...</Text> */}
+              <SkeletonLoader />
+            </>
+          ) : (
+            cards.map((card) => (
+              <View
+                key={card.id}
+                style={styles.cardContainer}>
+                <CardComponent {...card} />
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
     </>
