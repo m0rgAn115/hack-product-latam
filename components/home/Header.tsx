@@ -1,5 +1,4 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import { useUserStore } from "@/store/useUserStore";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
@@ -11,6 +10,7 @@ const Header = () => {
   type RootStackParamList = {
     Home: undefined;
     Summary: undefined;
+    Profile: undefined;
     CategoryDetail: {
       category: string;
       transactions: Array<{
@@ -29,28 +29,30 @@ const Header = () => {
 
   return (
     <View style={{ backgroundColor: "#fff" }}>
-      <SafeAreaView />
-
       <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          paddingVertical: 30,
+          // paddingVertical: 30,
           paddingHorizontal: "3.5%",
         }}>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Image
-            source={{ uri: "https://i.pravatar.cc/250?u=14" }}
-            style={{ height: 50, width: 50, borderRadius: 50 }}
-          />
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+            <Image
+              source={{
+                uri: `https://ui-avatars.com/api/?name=${nombre}&background=0D8ABC&color=fff`,
+              }}
+              style={{ height: 35, width: 35, borderRadius: 50 }}
+            />
+          </TouchableOpacity>
           <View>
-            <Text style={{ fontSize: 12, marginLeft: 10, color: 'black' }}>
-              Hola, {nombre}
+            <Text style={{ fontSize: 12, marginLeft: 10, color: "black" }}>
+              Hi, {nombre}
             </Text>
             <Text
               style={{ fontSize: 14, fontWeight: "semibold", marginLeft: 10 }}>
-              Tu <Text style={{ fontWeight: 700 }}>Presupuesto</Text>
+              Your <Text style={{ fontWeight: 700 }}>budget</Text>
             </Text>
           </View>
         </View>
@@ -65,7 +67,7 @@ const Header = () => {
               padding: 8,
               borderRadius: 10,
             }}>
-            Analisis
+            Analysis
           </Text>
         </TouchableOpacity>
       </View>
