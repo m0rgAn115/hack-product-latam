@@ -1,5 +1,7 @@
 import useFetch from "@/hooks/useFetch";
+import { useCardsStore } from "@/store/useCardStore";
 import { useUserStore } from "@/store/useUserStore";
+import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -12,7 +14,7 @@ import {
   Platform,
 } from "react-native";
 
-type Card = {
+export type Card = {
   id: string,
   balance: number,
   name: string,
@@ -26,7 +28,9 @@ const CARD_HEIGHT = CARD_WIDTH * 1.1;
 
 const Cards = () => {
   const {  setUser, correo } = useUserStore();
-  const [cards, setCards] = useState<Card[]>([]);
+
+  const { cards } = useCardsStore()
+  const isFocused = useIsFocused()
 
 
   useEffect(() => {
@@ -35,28 +39,6 @@ const Cards = () => {
     
   }, [cards])
 
-  useEffect(() => {
-    if (correo) {
-      const fetchCardsForTokens = async () => {
-        await useFetch(
-          'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards/email',
-          { correo },
-          'POST'
-        ).then((data) => {
-          const newCards = data.cuentas.map((card: any) => ({
-            id: card.account_id,
-            balance: card.balances.current,
-            name: card.name,
-            type: card.type,
-            accent: card.accent,
-          }));
-          setCards(newCards);
-        });
-      };
-      fetchCardsForTokens();
-    }
-  }, [correo]);
-  
 
   const CardComponent = (card: Card) => {
     let accent = "#ffffff";

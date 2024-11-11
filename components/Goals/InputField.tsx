@@ -18,6 +18,7 @@ const InputField: React.FC<InputFieldProps> = ({
         
         <TextInput
           style={styles.input}
+          value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
           keyboardType={keyboardType}

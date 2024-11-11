@@ -10,6 +10,7 @@ import CategoryDetailScreen from "@/components/Expenses/CategoryDetailScreen";
 import SubscriptionsCard from "@/components/Expenses/SubscriptionsCard";
 import Analisis from "@/components/Summary/summary";
 import ProfileScreen from "@/components/profile/ProfileScreen";
+import { router } from "expo-router";
 
 export default function HomeScreen() {
 

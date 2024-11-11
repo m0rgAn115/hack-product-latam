@@ -11,6 +11,7 @@ import { mainCategories } from '@/components/Expenses/categoriesConfig';
 import { useUserStore } from '@/store/useUserStore';
 import useFetch from '@/hooks/useFetch';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTransactionsStore } from '@/store/useTransactionsStore';
 
 type RootStackParamList = {
   Gastos: undefined;
@@ -28,7 +29,7 @@ type RootStackParamList = {
   onPress: () => void;
 };
 
-interface PlaidTransaction {
+export interface PlaidTransaction {
   date: string;
   amount: number;
   logo_url?: string;
@@ -45,6 +46,8 @@ const Months_data: string[] = [
 
 const Expensess = () => {
   const { correo } = useUserStore();
+  const { transacciones } = useTransactionsStore()
+
 
   const [transactionsData, setTransactions] = useState<PlaidTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,50 +57,58 @@ const Expensess = () => {
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth());
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Función para obtener las transacciones
+  // // Función para obtener las transacciones
+  // useEffect(() => {
+  //   const fetchTransactions = async () => {
+  //     try {
+  //       const data = await useFetch(
+  //         'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/transactions/email',
+  //         { correo },
+  //         'POST'
+  //       );
+
+  //       if (data && data.transacciones) {
+  //         // Formatear las transacciones
+  //         const formattedTransactions: PlaidTransaction[] = data.transacciones
+  //           .flat()
+  //           .map((transaction: any) => ({
+  //             date: transaction.date,
+  //             amount: transaction.amount,
+  //             logo_url: transaction.logo_url,
+  //             merchant_name: transaction.merchant_name,
+  //             name: transaction.name,
+  //             category: Array.isArray(transaction.category) ? transaction.category : [],
+  //             mainCategory: transaction.mainCategory || "Others",
+  //           }));
+
+  //         console.log(data);
+  //         console.log(data.transacciones);
+
+  //         // Filtrar las transacciones
+  //         const filteredData = filterTransactions(formattedTransactions);
+  //         setTransactions(filteredData);
+  //         setIsLoading(false);
+  //       } else {
+  //         setError(new Error('No se encontraron transacciones'));
+  //       }
+
+  //     } catch (error) {
+  //       console.error('Error al obtener las transacciones:', error);
+  //       setError(error as Error);
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   fetchTransactions();
+  // }, [correo]);
+
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const data = await useFetch(
-          'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/transactions/email',
-          { correo },
-          'POST'
-        );
-
-        if (data && data.transacciones) {
-          // Formatear las transacciones
-          const formattedTransactions: PlaidTransaction[] = data.transacciones
-            .flat()
-            .map((transaction: any) => ({
-              date: transaction.date,
-              amount: transaction.amount,
-              logo_url: transaction.logo_url,
-              merchant_name: transaction.merchant_name,
-              name: transaction.name,
-              category: Array.isArray(transaction.category) ? transaction.category : [],
-              mainCategory: transaction.mainCategory || "Others",
-            }));
-
-          console.log(data);
-          console.log(data.transacciones);
-
-          // Filtrar las transacciones
-          const filteredData = filterTransactions(formattedTransactions);
-          setTransactions(filteredData);
-          setIsLoading(false);
-        } else {
-          setError(new Error('No se encontraron transacciones'));
-        }
-
-      } catch (error) {
-        console.error('Error al obtener las transacciones:', error);
-        setError(error as Error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [correo]);
+    if(transacciones) {
+      setTransactions(transacciones)
+      setIsLoading(false)
+    }
+  }, [transacciones])
+  
 
   if (isLoading) {
     return <Text style={{ backgroundColor: "#fff" }}>Cargando...</Text>;

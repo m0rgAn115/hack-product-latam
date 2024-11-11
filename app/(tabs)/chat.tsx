@@ -83,6 +83,7 @@ export default function ChatScreen() {
   const [currentAgent, setCurrentAgent] = useState<"master" | "goal" | "chat">(
     "chat"
   );
+
   const [nextAgent, setNextAgent] = useState<"master" | "goal" | "chat" | null>(
     null
   );
@@ -131,7 +132,7 @@ export default function ChatScreen() {
   }, [context]);
 
   useEffect(() => {
-    console.log(currentAgent);
+    
   }, [currentAgent]);
 
   const handleInputValue = () => {
@@ -329,7 +330,7 @@ export default function ChatScreen() {
           description: q_goal_description,
           deadline: q_deadline,
           title: q_goal_title,
-          total_amount: q_goal_amount,
+          goal_amount: q_goal_amount,
         });
         setinformation_completed(true);
       }
@@ -375,6 +376,9 @@ export default function ChatScreen() {
   const handleSendMessage = async () => {
     if (!inputValue) return;
 
+    if(information_completed)
+      clearChat()
+
     const userMsg = inputValue;
     const userInput = userMsg.toLowerCase();
 
@@ -407,6 +411,7 @@ export default function ChatScreen() {
   };
 
   useEffect(() => {
+    if(information_completed)
     if (flatListRef.current) {
       flatListRef.current.scrollToEnd({ animated: true });
     }
@@ -416,7 +421,7 @@ export default function ChatScreen() {
     console.log(goal_details);
 
     router.push(
-      `/goal-details?q_goal_title=${goal_details?.title}&q_goal_amount=${goal_details?.total_amount}&q_initial_amount=${goal_details?.actual_amount}&q_goal_description=${goal_details?.description}&q_plazo=${goal_details?.deadline}`
+      `/goal-details?q_goal_title=${goal_details?.title}&q_goal_amount=${goal_details?.goal_amount}&q_initial_amount=${goal_details?.actual_amount}&q_goal_description=${goal_details?.description}&q_plazo=${goal_details?.deadline}`
     );
   };
 
@@ -425,6 +430,12 @@ export default function ChatScreen() {
     setConversation([]);
     setinformation_completed(false);
   };
+
+  useEffect(() => {
+    console.log(conversation);
+    
+  }, [conversation])
+  
 
   return (
     <View
@@ -435,6 +446,22 @@ export default function ChatScreen() {
         flex: 1,
       }}>
       <View style={{ elevation: 4 }}>
+          <Pressable
+            onPress={clearChat}
+            disabled={!agentAvailable}
+            style={({ pressed }) => [
+              { opacity: pressed ? 0.3 : 1, borderRadius: 50, marginRight: 5,flexDirection: 'row', alignItems: 'center' },
+            ]}>
+              <Ionicons
+                name="add-circle-outline"
+                size={25}
+                style={{marginRight: 5}}
+
+              />
+              <Text >New Chat</Text>
+
+            </Pressable>
+            
         <Text style={{ fontSize: 14, textAlign: "center", marginVertical: 30 }}>
           TEPOZ AI
         </Text>
