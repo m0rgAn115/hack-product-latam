@@ -1,18 +1,30 @@
 import { Stack, Tabs } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+// import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  Platform,
+  StatusBar,
+} from "react-native";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
+const CustomSafeArea = ({ children, style }) => {
+  return (
+    <SafeAreaView style={[styles.safeArea, style]}>{children}</SafeAreaView>
+  );
+};
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
+    <CustomSafeArea style={styles.safeArea}>
+      {/* <StatusBar style="dark" /> */}
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors["light"].tint,
@@ -73,13 +85,23 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </SafeAreaView>
+    </CustomSafeArea>
   );
 }
 
 const styles = StyleSheet.create({
+  // safeArea: {
+  //   flex: 1,
+  //   backgroundColor: "#fff",
+  // },
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white", // Customize your background color
+    // Only add paddingTop on Android to handle status bar
+    ...Platform.select({
+      android: {
+        paddingTop: StatusBar.currentHeight,
+      },
+    }),
   },
 });
