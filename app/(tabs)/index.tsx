@@ -44,7 +44,7 @@ export default function HomeScreen() {
             <>
               <View style={{ backgroundColor: "#fff", 
                               flex: 1, 
-                              paddingVertical: "5%"
+                              paddingVertical: "8%"
                 }}>
                 <Header />
                 {/* <ScrollView> */}

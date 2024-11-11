@@ -11,19 +11,19 @@ interface CaptionProps {
 }
 
 const Caption: React.FC<CaptionProps> = ({ parameters }) => {
-  // Asegúrate de que haya al menos un parámetro
+  // Ensure there is at least one parameter
   if (parameters.length === 0) {
     return null;
   }
 
-  // Usamos el primer parámetro
+  // Use the first parameter
   const { range, formattedDate } = parameters[0];
 
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{range.min}</Text>
       <View style={styles.center}>
-        <Text style={styles.text}>Última actualización el</Text>
+        <Text style={styles.text}>Last updated on</Text>
         <Text style={styles.text}>{formattedDate}</Text>
       </View>
       <Text style={styles.text}>{range.max}</Text>
@@ -31,7 +31,7 @@ const Caption: React.FC<CaptionProps> = ({ parameters }) => {
   );
 };
 
-// Estilos centralizados
+// Centralized styles
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: '5%',

@@ -1,7 +1,5 @@
 import React from "react";
 import { View, StyleSheet, Text, Dimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { SegmentedArc } from "@shipt/segmented-arc-for-react-native";
 
 import ParameterList from "@/components/Summary/ParameterList";
 import ArcComponent from "@/components/Summary/ArcComponent";
@@ -20,11 +18,11 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import Header from "../Header";
 
-export default function Analisis() {
+export default function Analysis() {
   const { width } = Dimensions.get("window");
   const radius = width * 0.38;
 
-  // Colores de uso constante
+  // Constant colors
   const COLOR_PRIMARY = "#856FE5";
   const COLOR_EMPTY = "#E3E3E5";
 
@@ -39,7 +37,7 @@ export default function Analisis() {
   });
 
   if (!fontsLoaded) {
-    return <Text style={styles.loadingText}>Cargando...</Text>;
+    return <Text style={styles.loadingText}>Loading...</Text>;
   }
 
   //---------------------Data---------------------
@@ -78,31 +76,31 @@ export default function Analisis() {
     {
       min: 0,
       max: 200,
-      label: "Muy bajo",
+      label: "Very Low",
       color: "#FF0000",
     },
     {
       min: 200,
       max: 400,
-      label: "Intermedio",
+      label: "Intermediate",
       color: "#FFA500",
     },
     {
       min: 400,
       max: 600,
-      label: "Sano",
+      label: "Healthy",
       color: "#FFFF00",
     },
     {
       min: 600,
       max: 800,
-      label: "Sobresaliente",
+      label: "Outstanding",
       color: "#ADFF2F",
     },
     {
       min: 800,
       max: 1000,
-      label: "Impecable",
+      label: "Impeccable",
       color: "#32CD32",
     },
   ];
@@ -137,7 +135,7 @@ export default function Analisis() {
     },
   ];
 
-  const formattedDate = new Date().toLocaleDateString("es-ES", {
+  const formattedDate = new Date().toLocaleDateString("en-EN", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -145,19 +143,19 @@ export default function Analisis() {
 
   const parameters = [
     {
-      title: "Eficiencia Financiera",
+      title: "Financial Efficiency",
       percentage: Number(data.first).toFixed(2),
       statusColor: "#3D924B",
       showMore: true,
     },
     {
-      title: "Índice de Ahorro",
+      title: "Savings Index",
       percentage: Number(data.third).toFixed(2),
       statusColor: "#DF8E13",
       showMore: true,
     },
     {
-      title: "Estabilidad de Gastos",
+      title: "Expense Stability",
       percentage: Number(data.second).toFixed(2),
       statusColor: "#3D924B",
       showMore: true,
@@ -184,10 +182,11 @@ export default function Analisis() {
   );
 }
 
-// Estilos centralizados
+// Centralized styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingVertical: 10,
     backgroundColor: "#FEFEFE",
   },
   loadingText: {

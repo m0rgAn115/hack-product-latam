@@ -34,29 +34,29 @@ const ParameterList: React.FC<ParameterListProps> = ({ parameters }) => {
             <Text style={[
                 styles.statusText,
                 { color: 
-                    param.percentage > 80 ? 'green' :  // Sobresaliente
-                    param.percentage > 60 ? 'blue' :  // Bueno
-                    param.percentage > 40 ? 'orange' :  // Aceptable
-                    param.percentage > 20 ? 'yellow' :  // Mejorable
-                    'red'  // Deficiente
+                    param.percentage > 80 ? 'green' :  // Excellent
+                    param.percentage > 60 ? 'blue' :  // Good
+                    param.percentage > 40 ? 'orange' :  // Fair
+                    param.percentage > 20 ? 'yellow' :  // Low
+                    'red'  // Critical
                 }
               ]}
             >
               {
                 param.percentage > 80
-                ? 'Excelente'
+                ? 'Excellent'
                 : param.percentage > 60
-                ? 'Bueno'
+                ? 'Good'
                 : param.percentage > 40
-                ? 'Regular'
+                ? 'Fair'
                 : param.percentage > 20
-                ? 'Bajo'
-                : 'Crítico'
+                ? 'Low'
+                : 'Critical'
               }
             </Text>
             
             {param.showMore && (
-                <Text style={styles.showMoreText}>Conocer más {'>'}</Text>
+                <Text style={styles.showMoreText}>Learn more {'>'}</Text>
             )}
             
           </View>
