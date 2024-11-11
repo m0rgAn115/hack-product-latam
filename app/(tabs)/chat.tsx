@@ -1,29 +1,23 @@
 import {
-  Image,
   StyleSheet,
-  Platform,
   Pressable,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
-  ScrollView,
   FlatList,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Transaction } from "@/components/Interfaces/transaction.interface";
 import { RenderGraphic } from "@/components/chat/RenderGraphic";
-import GraphPerMonth from "@/components/Expenses/GraphPerMonth";
-import { Transactions_Testing } from "@/components/Expenses/Transactions_Testing";
-import { filterTransactions } from "@/components/Expenses/filterTransactions";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MainCategories } from "@/components/Expenses/categoriesConfig";
 import useFetch from "@/hooks/useFetch";
-import { Try } from "expo-router/build/views/Try";
 import { Goal } from "@/components/Interfaces/goal";
+import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { useUserStore } from "@/store/useUserStore";
 import { useRoute, RouteProp } from "@react-navigation/native";
+import KeyboardLayout from "@/components/chat/KeyboardLayout";
 
 const fechaActual = new Date();
 
@@ -70,10 +64,15 @@ const server =
   "https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/tepoz-ai";
 
 export default function ChatScreen() {
+  const router = useRouter();
+
+  // Función para regresar
+  const handleBack = () => {
+    router.back();
+  };
   const route = useRoute<RouteProp<RootStackParamList, "Chat">>();
   const { context = undefined } = route.params || {};
   // console.log(context);
-  const router = useRouter();
   const textInputRef = useRef<TextInput>(null);
   const flatListRef = useRef<FlatList>(null);
   const [inputValue, setInputValue] = useState<string | undefined>(undefined);
@@ -438,95 +437,134 @@ export default function ChatScreen() {
   
 
   return (
-    <View
-      style={{
-        paddingHorizontal: "5%",
-        paddingTop: "5%",
-        backgroundColor: "white",
-        flex: 1,
-      }}>
-      <View style={{ elevation: 4 }}>
-          <Pressable
-            onPress={clearChat}
-            disabled={!agentAvailable}
-            style={({ pressed }) => [
-              { opacity: pressed ? 0.3 : 1, borderRadius: 50, marginRight: 5,flexDirection: 'row', alignItems: 'center' },
-            ]}>
-              <Ionicons
-                name="add-circle-outline"
-                size={25}
-                style={{marginRight: 5}}
-
-              />
-              <Text >New Chat</Text>
-            </Pressable>
-        <Text style={{ fontSize: 14, textAlign: "center", marginVertical: 30 }}>
-
-          TEPOZ AI
-        </Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <FlatList
-          ref={flatListRef}
-          data={conversation}
-          renderItem={({ item }) => (
-            <ChatItem
-              item={item}
-              assistant_response_state={assistant_response_state}
-              last_msg_index={conversation.length - 1}
-              info_completed_state={information_completed}
-              onPress={handleGoalCompleted}
-              showChart
-              transactions={transactions}
+    
+      <KeyboardLayout>
+        <View style={{ elevation: 4, flexDirection: 'row', alignItems: 'center', position: 'relative', marginBottom: 15 }}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <TabBarIcon 
+              name={"chevron-back-outline"}
+              size={30}
+              color="#4A4A4A" 
             />
-          )}
-          keyExtractor={(item, index) => index.toString()}
-        />
-      </View>
+          </TouchableOpacity>
+          <Text style={{ fontSize: 24, fontWeight: '600', flex: 1, textAlign: 'center' }}>
+            Tepoz AI
+          </Text>
 
-      <View
-        style={{
-          backgroundColor: "#ececec",
-          borderRadius: 20,
-          padding: 10,
-          marginVertical: 10,
-        }}>
-        <View style={{ flexDirection: "row" }}>
-          <TextInput
-            ref={textInputRef}
-            value={inputValue}
-            onChangeText={setInputValue}
-            placeholder="Send a message..."
-            multiline
-            style={{ fontSize: 16, flex: 1, paddingHorizontal: 10 }}
-            onFocus={() => console.log("Input focused")}
-            onPressOut={handleInputValue}
-          />
-          <View style={{ flexDirection: "column", justifyContent: "flex-end" }}>
+          <View style={{ position: 'absolute', right: 0 }}>
             <Pressable
-              onPress={handleSendMessage}
+              onPress={clearChat}
               disabled={!agentAvailable}
               style={({ pressed }) => [
-                { opacity: pressed ? 0.3 : 1, borderRadius: 50 },
-              ]}>
-              {agentAvailable ? (
-                <Ionicons
-                  name="send-sharp"
-                  size={25}
-                  style={{}}
-                />
-              ) : (
-                <Ionicons
-                  name="ellipse-outline"
-                  size={25}
-                  style={{ opacity: 0.3 }}
-                />
-              )}
+                {
+                  opacity: pressed ? 0.3 : 1,
+                  borderRadius: 50,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                },
+              ]}
+            >
+              <Ionicons
+                name="add-circle-outline"
+                size={30}
+                style={{ marginRight: 5 }}
+              />
+              
             </Pressable>
           </View>
         </View>
-      </View>
-    </View>
+        <View style={{ flex: 1 }}>
+          {
+            conversation.length > 0 ? (
+              <FlatList
+                ref={flatListRef}
+                data={conversation}
+                renderItem={({ item }) => (
+                  <ChatItem
+                    item={item}
+                    assistant_response_state={assistant_response_state}
+                    last_msg_index={conversation.length - 1}
+                    info_completed_state={information_completed}
+                    onPress={handleGoalCompleted}
+                    showChart
+                    transactions={transactions}
+                  />
+                )}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            ) : (
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View
+                style={{
+                  width: 45,
+                  height: 45,
+                  alignItems: "center",
+                  backgroundColor: "#20B2AA",
+                  justifyContent: "center",
+                  borderRadius: 100,
+                  marginBottom: 45
+                }}>
+                  <Ionicons
+                    name="aperture-outline"
+                    size={40}
+                    color="white"
+                  />
+                </View>
+                <Text style={{ fontSize: 18, color: '#4A4A4A' }}>
+                  Hi! I'm Tepoz AI, your financial assistant.
+                </Text>
+                <Text style={{ fontSize: 18, color: '#4A4A4A' }}>
+                  Let's talk finance!
+                </Text>
+              </View>
+            )
+          }
+        </View>
+
+
+        <View
+          style={{
+            backgroundColor: "#ececec",
+            borderRadius: 20,
+            padding: 10,
+            marginVertical: 10,
+          }}>
+          <View style={{ flexDirection: "row" }}>
+            <TextInput
+              ref={textInputRef}
+              value={inputValue}
+              onChangeText={setInputValue}
+              placeholder="Send a message..."
+              multiline
+              style={{ fontSize: 16, flex: 1, paddingHorizontal: 10 }}
+              onFocus={() => console.log("Input focused")}
+              onPressOut={handleInputValue}
+            />
+            <View style={{ flexDirection: "column", justifyContent: "flex-end" }}>
+              <Pressable
+                onPress={handleSendMessage}
+                disabled={!agentAvailable}
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.3 : 1, borderRadius: 50 },
+                ]}>
+                {agentAvailable ? (
+                  <Ionicons
+                    name="send-sharp"
+                    size={25}
+                    style={{}}
+                  />
+                ) : (
+                  <Ionicons
+                    name="ellipse-outline"
+                    size={25}
+                    style={{ opacity: 0.3 }}
+                  />
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </KeyboardLayout>
   );
 }
 
@@ -708,5 +746,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: "absolute",
+  },
+  backButton: {
+    position: "absolute",
+    left: -10,
+    padding: 10,
+    zIndex: 10,
   },
 });
