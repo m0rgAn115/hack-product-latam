@@ -435,7 +435,7 @@ export default function ChatScreen() {
         flex: 1,
       }}>
       <View style={{ elevation: 4 }}>
-        <Text style={{ fontSize: 14, textAlign: "center", marginVertical: 30 }}>
+        <Text style={{ fontSize: 14, textAlign: "center" }}>
           TEPOZ AI
         </Text>
       </View>

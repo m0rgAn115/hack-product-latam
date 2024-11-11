@@ -143,14 +143,17 @@ const Expensess = () => {
     color: categoryColors[category as keyof typeof categoryColors] || '#F2E1C1',
   }));
 
-
   return (
     <SafeAreaView style={styles.container}>
-      <Header title='Expenses'/>
+      
       <FlatList
         data={groupedData}
+        style={{ flex: 1 }} 
         ListHeaderComponent={
           <>
+            <Text style={{ fontSize: 24, fontWeight: '700', textAlign: 'center', marginBottom: 20 }}>
+              Expenses
+            </Text>
             <MonthSelector
               mesSeleccionado={mesSeleccionado}
               setMesSeleccionado={setMesSeleccionado}
@@ -187,17 +190,16 @@ const Expensess = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     paddingHorizontal: 20,
-    paddingTop: 20,
   },
   total: {
     fontSize: 38,
     fontWeight: '700',
     textAlign: 'center',
     fontFamily: 'Roboto',
-    marginBottom: 25,
     letterSpacing: 1,
+    flex: 1,
   }
 });
 
