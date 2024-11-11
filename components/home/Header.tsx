@@ -37,23 +37,24 @@ const Header = () => {
           paddingHorizontal: "3.5%",
         }}>
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 15 }}>
-          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={{flexDirection: "row", alignItems: "center"}}>
             <Image
               source={{
                 uri: `https://ui-avatars.com/api/?name=${nombre}&background=0D8ABC&color=fff`,
               }}
               style={{ height: 35, width: 35, borderRadius: 50 }}
             />
-          </TouchableOpacity>
-          <View>
-            <Text style={{ fontSize: 12, marginLeft: 10, color: "black" }}>
+            <View>
+            <Text style={{ fontSize: 14, marginLeft: 10, color: "black" }}>
               Hi, {nombre}
             </Text>
             <Text
-              style={{ fontSize: 14, fontWeight: "semibold", marginLeft: 10 }}>
+              style={{ fontSize: 18, fontWeight: "semibold", marginLeft: 10 }}>
               Your <Text style={{ fontWeight: 700 }}>budget</Text>
             </Text>
           </View>
+          </TouchableOpacity>
+          
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("Summary")}>
           <Text

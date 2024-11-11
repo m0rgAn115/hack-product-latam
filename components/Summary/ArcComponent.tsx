@@ -28,7 +28,7 @@ const ArcComponent: React.FC<ArcComponentProps> = ({
   radius,
 }) => {
   const formattedFillValue = Math.round(fillValue);
-  const pointsText = newPoints !== 0 ? `${newPoints > 0 ? '+' : ''}${newPoints} puntos` : '';
+  const pointsText = newPoints !== 0 ? `${newPoints > 0 ? '+' : ''}${newPoints} points` : '';
   
   return (
     <SegmentedArc

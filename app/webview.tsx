@@ -4,13 +4,18 @@ import { View, Alert, Text } from 'react-native';
 import useGetTokens from '@/hooks/useGetTokens';
 import useFetch from '@/hooks/useFetch';
 import { useUserStore } from '@/store/useUserStore';
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 
 const API_BASE_URL = 'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/';
 
 export default function PlaidShow() {
   const [linkToken, setLinkToken] = useState(null);
   const { correo } = useUserStore(); 
+  const router = useRouter();
+
+  const handleKick = () => {
+    router.navigate('/(tabs)')
+  }
 
   useEffect(() => {
     const createLinkToken = async () => {
@@ -117,7 +122,7 @@ export default function PlaidShow() {
     <PlaidLink
       linkToken={linkToken}
       onEvent={(event) => console.log('Plaid event:', event)}
-      onExit={(exit) => console.log('Plaid exit:', exit)}
+      onExit={(exit) => handleKick()}
       onSuccess={(success) => handleSuccess(success)}
     />
   )
