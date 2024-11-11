@@ -10,9 +10,8 @@ import {
   Pressable,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useUserStore } from "@/store/useUserStore";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import Header from "../Header";
 
 const ProfileScreen = () => {

@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { set } from "date-fns";
 
 interface Slide {
   title: string;
@@ -40,6 +41,7 @@ const Slides: React.FC<AutoSliderProps> = ({
   intervalTime = 5000,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardRecommend, setCardRecommend] = useState("");
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList<Slide>>(null);
   const { width } = Dimensions.get("window");
@@ -57,6 +59,7 @@ const Slides: React.FC<AutoSliderProps> = ({
         merchant_name?: string;
       }>;
     };
+    Chat: { context: string };
     subscriptions: undefined;
   };
 
@@ -1119,9 +1122,12 @@ const Slides: React.FC<AutoSliderProps> = ({
   ];
 
   const obtenerCaracteristicasTarjeta = (nombreTarjeta: string) => {
-    return tarjetas_mex.find(
+    const cards_filtered = tarjetas_mex.find(
       (tarjeta) => tarjeta.nombre_tarjeta === nombreTarjeta
     );
+    console.log(cards_filtered);
+    setCardRecommend(JSON.stringify(cards_filtered));
+    return cards_filtered;
   };
 
   useEffect(() => {
@@ -1140,9 +1146,8 @@ const Slides: React.FC<AutoSliderProps> = ({
         const parsedBody = JSON.parse(result.body);
         // console.log(parsedBody);
         setRecommendationData(parsedBody.response);
-        // console.log(
-        //   obtenerCaracteristicasTarjeta(parsedBody.response.nombre_tarjeta)
-        // );
+
+        obtenerCaracteristicasTarjeta(parsedBody.response.nombre_tarjeta);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -1231,7 +1236,11 @@ const Slides: React.FC<AutoSliderProps> = ({
     return (
       <TouchableOpacity
         style={[styles.slide, { width }]}
-        onPress={() => navigation.navigate(item.url)}>
+        onPress={() =>
+          navigation.navigate(item.url, {
+            context: `Quiero que me digas por que esta tarjeta es una buena opcion para mi perfil financiero: ${cardRecommend} usa mis transacciones de apoyo para saber mis gastos y ingresos.`,
+          })
+        }>
         {item.icon && <View style={styles.iconContainer}>{item.icon}</View>}
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
