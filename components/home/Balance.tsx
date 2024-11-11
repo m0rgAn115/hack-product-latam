@@ -7,8 +7,7 @@ const Balance = () => {
   const balanceTotal = "1040.00";
   const porcent = "16.8%";
 
-  const {  saldo } = useUserStore();
-
+  const { saldo } = useUserStore();
 
   const pieData = [
     {
@@ -32,11 +31,9 @@ const Balance = () => {
   return (
     <View style={styles.balance}>
       <View>
-        <Text>Tu balance total</Text>
+        <Text>Your total balance</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Text style={{ fontWeight: "bold", fontSize: 22 }}>
-            ${saldo}
-          </Text>
+          <Text style={{ fontWeight: "bold", fontSize: 22 }}>${saldo}</Text>
           <View
             style={{
               borderWidth: 1,
