@@ -60,7 +60,7 @@ export default function TabTwoScreen() {
           onPressNewGoal={() => handlePress('New Goal')}
           handlePress={handlePress}
         />
-        {data.map((goal) => (
+        {goals.map((goal) => (
           <GoalBox
             key={goal.title} // Usar un identificador único en lugar de index
             onPress={handleSelectGoal}
