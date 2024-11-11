@@ -149,9 +149,6 @@ export default function PlaidShow() {
       onEvent={(event: any) => console.log('Plaid event:', event)}
       onExit={(exit: any) => handleKick()}
       onSuccess={(success: any) => handleSuccess(success)}
-      onEvent={(event:any) => console.log('Plaid event:', event)}
-      onExit={(exit:any) => console.log('Plaid exit:', exit)}
-      onSuccess={(success:any) => handleSuccess(success)}
     />
   )
 }
