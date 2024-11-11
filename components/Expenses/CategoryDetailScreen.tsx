@@ -39,7 +39,9 @@ const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
   const router = useRouter();
 
   const handleBack = () => {
-    router.navigate(`/transactions`);
+    console.log("hola");
+    
+    router.replace(`/(tabs)/transactions`);
   }
 
   const { category, transactions } = route.params;
@@ -52,18 +54,6 @@ const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
   );
   const dataValues = transactions.map((t) => Math.abs(t.amount));
 
-  useEffect(() => {
-    const backAction = () => {
-      handleBack(); 
-      return true;
-    };
-    
-    BackHandler.addEventListener('hardwareBackPress', backAction);
-      
-    return () => {
-      BackHandler.removeEventListener('hardwareBackPress', backAction);
-    };
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ title, onPress }) => {
   return (
     <View style={styles.header}>
       <Pressable
-        onPress={handleBack}
+        onPress={onPress}
         style={styles.backButton}>
         <Ionicons
           name="chevron-back-outline"
