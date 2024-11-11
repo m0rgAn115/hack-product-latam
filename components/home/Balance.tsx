@@ -4,7 +4,6 @@ import { StyleSheet, View, Text } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 const Balance = () => {
-  const balanceTotal = "1040.00";
   const porcent = "16.8%";
 
   const { saldo } = useUserStore();

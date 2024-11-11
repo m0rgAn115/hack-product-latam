@@ -1,8 +1,4 @@
-import { Alert } from "react-native";
 import useGetTokens from "./useGetTokens";
-import { useRefreshToken } from "./useRefreshToken";
-import { useValidateToken } from "./useValidateToken";
-import { useRouter } from "expo-router";
 
 const useFetch = async (endpoint: string, body:any, method:'POST'|'GET'|'PUT') => {
   try {

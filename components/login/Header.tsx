@@ -25,6 +25,7 @@ const Header: React.FC<HeaderProps> = ({ onBackPress, focused = false, Title }) 
 
 const styles = StyleSheet.create({
   headerContainer: {
+    marginTop: 16,
     flexDirection: 'row', 
     alignItems: 'center', // Alinea los elementos verticalmente
     paddingHorizontal: 16,

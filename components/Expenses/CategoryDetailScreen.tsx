@@ -1,12 +1,13 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
-import { LineChart } from "react-native-chart-kit";
+import React, { useEffect } from "react";
+import { View, Text, FlatList, StyleSheet, Dimensions, BackHandler } from "react-native";
 import { RouteProp } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native";
+import Header from "@/components/Header";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { categoryColors } from "./CategoryCard";
 import { Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { List } from "lucide-react";
 
 type RootStackParamList = {
   Home: undefined;
@@ -21,7 +22,6 @@ type RootStackParamList = {
       merchant_name?: string;
     }>;
   };
-  subscriptions: undefined;
 };
 type CategoryDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -32,78 +32,48 @@ interface CategoryDetailScreenProps {
   route: CategoryDetailScreenRouteProp;
 }
 
-const screenWidth = Dimensions.get("window").width;
 
 const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
   route,
 }) => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.navigate(`/transactions`);
+  }
+
   const { category, transactions } = route.params;
 
-  // Obtener el color de la categoría
   const chartColor =
     categoryColors[category as keyof typeof categoryColors] || "#6200EE";
 
-  // Ajustar las etiquetas del eje X y el formato de datos
   const labels = transactions.map((t, index) =>
     index % 2 === 0 ? t.name : ""
-  ); // Mostrar solo cada segundo nombre para evitar amontonamiento
-  const dataValues = transactions.map((t) => Math.abs(t.amount)); // Usar solo valores absolutos
+  );
+  const dataValues = transactions.map((t) => Math.abs(t.amount));
+
+  useEffect(() => {
+    const backAction = () => {
+      handleBack(); 
+      return true;
+    };
+    
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+      
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
+    };
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}>
-          <Ionicons
-            name="chevron-back"
-            size={24}
-            color="#4A4A4A"
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Expenses in {category}</Text>
-      </View>
-      {/* Gráfico de gastos */}
-      <LineChart
-        data={{
-          labels: labels,
-          datasets: [{ data: dataValues }],
-        }}
-        width={screenWidth - 40} // Ajusta el ancho de la pantalla
-        height={220}
-        yAxisLabel="$"
-        yAxisSuffix=""
-        yAxisInterval={1}
-        chartConfig={{
-          backgroundColor: "#ffffff",
-          backgroundGradientFrom: "#ffffff",
-          backgroundGradientTo: "#ffffff",
-          color: (opacity = 1) => chartColor,
-          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          style: {
-            borderRadius: 16,
-          },
-          propsForBackgroundLines: {
-            offsetX: 20,
-          },
-          propsForDots: {
-            r: "4",
-            strokeWidth: "2",
-            stroke: chartColor,
-          },
-        }}
-        bezier
-        style={{
-          marginBottom: 25,
-          borderRadius: 16,
-        }}
-      />
-      {/* Lista de transacciones */}
+    <SafeAreaView style={styles.container}>
+      <Header title={category} onPress={handleBack}/>
       <View style={styles.card}>
         <FlatList
+          style={styles.list}
           data={transactions}
-          keyExtractor={(item) => item.name + item.date}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, index) => `${item.name}-${index}`}
           renderItem={({ item, index }) => (
             <View
               style={[
@@ -124,7 +94,10 @@ const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
                   />
                 )}
               </View>
-              <Text style={styles.transactionTitle}>{item.name}</Text>
+              <Text style={styles.transactionTitle}
+                numberOfLines={1}
+                ellipsizeMode= 'tail'
+              >{item.name}</Text>
               <View style={styles.transactionDetails}>
                 <Text style={styles.transactionAmount}>
                   {" "}
@@ -136,17 +109,16 @@ const CategoryDetailScreen: React.FC<CategoryDetailScreenProps> = ({
           )}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    marginBottom: 40,
+  container: {
+    flex: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
   },
   icon: {
     width: 24,
@@ -160,27 +132,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   lastItem: {
-    borderBottomWidth: 0, // Remueve la línea inferior en el último elemento
+    borderBottomWidth: 0,
   },
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 15,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  backButton: {
-    position: "absolute",
-    left: 0,
-  },
-  container: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
   },
   title: { fontSize: 18, fontWeight: "bold", color: "#4A4A4A" },
   transactionHeader: {
@@ -188,21 +143,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
   },
   transactionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
     flex: 1,
+    marginRight: 10,
   },
   transactionDetails: {
     flexDirection: "column",
     alignItems: "flex-end",
   },
-  transactionAmount: { fontSize: 16, fontWeight: "bold", color: "#333" },
-  transactionDate: { fontSize: 14, color: "#888" },
+  transactionAmount: { fontSize: 16, fontWeight: "600" },
+  transactionDate: { fontSize: 12, color: "#888" },
+  list:{
+    borderRadius: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#EFEFF1",
+  }
 });
 
 export default CategoryDetailScreen;

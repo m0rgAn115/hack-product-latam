@@ -5,15 +5,18 @@ import { useRouter } from "expo-router";
 
 interface HeaderProps {
   title: string;
+  onPress?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, onPress }) => {
   const router = useRouter();
 
   // Función para regresar
   const handleBack = () => {
     router.back();
   };
+
+  const handlePress = onPress || handleBack;
 
   return (
     <View style={styles.header}>
