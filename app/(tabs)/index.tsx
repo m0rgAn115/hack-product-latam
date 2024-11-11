@@ -9,12 +9,14 @@ import { createStackNavigator } from "@react-navigation/stack";
 import CategoryDetailScreen from "@/components/Expenses/CategoryDetailScreen";
 import SubscriptionsCard from "@/components/Expenses/SubscriptionsCard";
 import Analisis from "@/components/Summary/summary";
+import ProfileScreen from "@/components/profile/ProfileScreen";
 
 export default function HomeScreen() {
 
   type RootStackParamList = {
     Home: undefined;
     Summary: undefined;
+    Profile: undefined;
     CategoryDetail: {
       category: string;
       transactions: Array<{
@@ -39,13 +41,13 @@ export default function HomeScreen() {
           options={{ headerShown: false }}>
           {() => (
             <>
-              <View style={{backgroundColor: '#fff', flex: 1}}>
-              <Header />
-              <ScrollView>
+              <View style={{ backgroundColor: "#fff", flex: 1 }}>
+                <Header />
+                {/* <ScrollView> */}
                 <Balance />
                 <Cards />
                 <Slides />
-              </ScrollView>
+                {/* </ScrollView> */}
               </View>
             </>
           )}
@@ -66,6 +68,12 @@ export default function HomeScreen() {
         <Stack.Screen
           name="Summary"
           component={Analisis}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
