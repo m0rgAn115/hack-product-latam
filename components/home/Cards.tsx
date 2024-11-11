@@ -130,6 +130,7 @@ const Cards = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
+    marginBottom: 10,
   },
   scrollContent: {
     paddingHorizontal: 20,

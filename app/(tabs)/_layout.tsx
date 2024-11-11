@@ -1,17 +1,13 @@
-import { Stack, Tabs } from "expo-router";
-// import { StatusBar } from "expo-status-bar";
+import { Tabs } from "expo-router";
 import React from "react";
 import {
   SafeAreaView,
   StyleSheet,
-  View,
   Platform,
   StatusBar,
 } from "react-native";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 const CustomSafeArea = ({ children, style }) => {
   return (
@@ -20,17 +16,21 @@ const CustomSafeArea = ({ children, style }) => {
 };
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <CustomSafeArea style={styles.safeArea}>
       {/* <StatusBar style="dark" /> */}
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors["light"].tint,
           tabBarStyle: {
             backgroundColor: "#fff",
-            borderTopColor: "#fff",
+            marginBottom: 5,
+            borderTopWidth: 0, 
+            elevation: 0, 
+            shadowOpacity: 0, 
+          },
+          tabBarLabelStyle: {
+            color: "#000",
           },
           headerShown: false,
         }}>
@@ -40,8 +40,8 @@ export default function TabLayout() {
             title: "Home",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "home" : "home-outline"}
-                color={color}
+                name={"home-outline"}
+                color={focused  ? "#000" : color }
               />
             ),
           }}
@@ -49,11 +49,10 @@ export default function TabLayout() {
         <Tabs.Screen
           name="transactions"
           options={{
-            title: "Expenses",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "calendar" : "calendar-outline"}
-                color={color}
+                name={"wallet-outline"}
+                color={focused  ? "#000" : color }
               />
             ),
           }}
@@ -63,10 +62,11 @@ export default function TabLayout() {
           name="chat"
           options={{
             title: "Chat",
+            tabBarStyle: { display: "none" },
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "chatbox" : "chatbox-outline"}
-                color={color}
+                name={"chatbubbles-outline"}
+                color={focused  ? "#000" : color }
               />
             ),
           }}
@@ -78,8 +78,8 @@ export default function TabLayout() {
             title: "Goals",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
-                name={focused ? "trophy" : "trophy-outline"}
-                color={color}
+                name={"trending-up-outline"}
+                color={focused  ? "#000" : color }
               />
             ),
           }}

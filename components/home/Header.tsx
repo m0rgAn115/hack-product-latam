@@ -23,7 +23,6 @@ const Header = () => {
     };
     subscriptions: undefined;
   };
-  type CategoryDetailScreenRouteProp = RouteProp<RootStackParamList, "Summary">;
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -37,7 +36,7 @@ const Header = () => {
           // paddingVertical: 30,
           paddingHorizontal: "3.5%",
         }}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 15 }}>
           <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
             <Image
               source={{
@@ -60,11 +59,13 @@ const Header = () => {
           <Text
             style={{
               fontSize: 14,
-              fontWeight: "semibold",
+              fontWeight: "bold",
               marginLeft: 10,
-              borderColor: "#666",
+              backgroundColor: "#000",
               borderWidth: 1,
+              color: "#fff",
               padding: 8,
+              paddingHorizontal: 15,
               borderRadius: 10,
             }}>
             Analysis
