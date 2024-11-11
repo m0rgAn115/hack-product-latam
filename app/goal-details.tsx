@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
+import { Pressable, StyleSheet, Text, View, ScrollView, Platform, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,9 @@ import { parseISO, format, differenceInDays } from 'date-fns';
 import InputField from '@/components/Goals/InputField';
 import Header from '@/components/Header';
 import GoalBox from '@/components/Goals/GoalBox';
+import { Goal } from '@/components/Interfaces/goal';
+import useFetch from '@/hooks/useFetch';
+import { useUserStore } from '@/store/useUserStore';
 
 const formatCurrency = (value: string | undefined): string => {
   if (!value) return '$ 0';
@@ -44,6 +47,8 @@ const GoalDetails = () => {
   const initialGoalTitle = Array.isArray(q_goal_title) ? q_goal_title[0] : q_goal_title || 'New Goal';
   console.log( "COMPONENTE", initialGoalTitle);
 
+  const { correo } = useUserStore()
+
   const [goalTitle, setGoalTitle] = useState<string>(initialGoalTitle);
   const [goalAmount, setGoalAmount] = useState<string>(formatCurrency(Array.isArray(q_goal_amount) ? q_goal_amount[0] : q_goal_amount || '0'));
   const [initialAmountValue, setInitialAmountValue] = useState<string>(formatCurrency(Array.isArray(q_initial_amount) ? q_initial_amount[0] : q_initial_amount || '0'));
@@ -51,10 +56,13 @@ const GoalDetails = () => {
   const [monthlySavings, setMonthlySavings] = useState<string>(formatCurrency('0'));
   const [monthsToGoal, setMonthsToGoal] = useState<string>('0');
   const [isUpdatingMonths, setIsUpdatingMonths] = useState<boolean>(false);
+  const [isUpdatingGoal, setIsUpdatingGoal] = useState<boolean>(false);
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow);
+  const parsedDate = Array.isArray(q_plazo) ? new Date(q_plazo[0]) : new Date(q_plazo || tomorrow);
+
+const [targetDate, setTargetDate] = useState<Date>(parsedDate);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
 
   useEffect(() => {
@@ -91,7 +99,8 @@ const GoalDetails = () => {
     }
   }, [q_plazo, goalAmount]);
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    await guardarMeta()
     router.back();
   };
 
@@ -154,21 +163,47 @@ const GoalDetails = () => {
       placeholder: "Enter goal amount",
     },
     {
-      label: "Initial Amount",
+      label: "Actual Amount",
       value: initialAmountValue,
       onChangeText: handleInitialAmountChange,
-      placeholder: "Enter initial amount",
+      placeholder: "Enter the actual amount",
     },
     
   ];
 
-  const goal = {
+  const goal:Goal = {
     title: goalTitle,
     description: goalDescription,
-    total_amount: parseFloat(unformatCurrency(goalAmount)),
+    goal_amount: parseFloat(unformatCurrency(goalAmount)),
     actual_amount: parseFloat(unformatCurrency(initialAmountValue)),
     deadline: targetDate ? targetDate.toISOString() : '',
   };
+
+  const guardarMeta = async () => {
+    setIsUpdatingGoal(true)
+
+    try {
+      const dataF = await useFetch("https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/goals/crear",
+        {
+          "correo": correo,
+          "title": goalTitle,
+          "deadline": targetDate ? targetDate.toISOString().split('T')[0] : tomorrow.toISOString().split('T')[0],
+          "description": goalDescription,
+          "goal_amount": unformatCurrency(goalAmount),
+          "actual_amount": unformatCurrency(initialAmountValue)
+        },
+        "POST"
+      )
+
+      if(dataF.statusCode === undefined) throw Error
+      
+      Alert.alert("Goal Saved", "Your goal was saved succesfully!")
+      setIsUpdatingGoal(false)
+
+    } catch (error) {
+      
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -220,7 +255,16 @@ const GoalDetails = () => {
           </View>
 
           <View style={styles.button}>
-            <Pressable style={styles.saveButton} onPress={handleBack}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.saveButton,
+                { opacity: pressed ? 0.7 : 1 },
+              ]}
+            
+            
+              
+             
+              onPress={handleBack} disabled={ isUpdatingGoal }>
               <Text style={styles.saveButtonText}>Save Goal</Text>
             </Pressable>
           </View>

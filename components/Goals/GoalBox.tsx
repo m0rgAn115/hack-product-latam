@@ -14,7 +14,7 @@ interface Component_Props {
 }
 
 export const GoalBox = ({ goal, onPress, ContainerStyles }: Component_Props) => {
-  const { actual_amount, title, total_amount, deadline, description} = goal;
+  const { goal_amount, title, actual_amount, deadline, description} = goal;
   
   const formattedDeadline = format(parseISO(deadline), 'd MMMM yyyy');
   const daysRemaining = differenceInDays(parseISO(deadline), new Date());
@@ -78,7 +78,7 @@ export const GoalBox = ({ goal, onPress, ContainerStyles }: Component_Props) => 
         <Text style={styles.amountLabel}>Amount:</Text>
         <View style={styles.amount}>
           <Text style={styles.amountText}>{formatCurrency(actual_amount)}</Text>
-          <Text style={styles.amountText}> / {formatCurrency(total_amount)}</Text>
+          <Text style={styles.amountText}> / {formatCurrency(goal_amount)}</Text>
         </View>
       </View>
     </Pressable>

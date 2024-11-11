@@ -7,16 +7,26 @@ import { useUserStore } from '@/store/useUserStore';
 import useFetch from '@/hooks/useFetch';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InputField from '@/components/login/InputField';
+import { PlaidTransaction } from '@/components/home/expensess';
+import { useTransactionsStore } from '@/store/useTransactionsStore';
+import { filterTransactions } from '@/components/Expenses/filterTransactions';
+import { useCardsStore } from '@/store/useCardStore';
 
 export const Login = () => {
   const router = useRouter();
   const { setUser } = useUserStore();
+
+  const { setTransacciones } = useTransactionsStore()
+
+  const { setCards } = useCardsStore()
 
   const [emailValue, setEmailValue] = useState('');
   const [passValue, setPassValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingUser, setLoadingUse] = useState(false);
   const [errorSession, setErrorSession] = useState('');
+
+
 
   const inputFields: {
     label: string;
@@ -111,7 +121,10 @@ export const Login = () => {
           saldo: 0
         });
 
-        router.navigate(`/(tabs)/`);
+        fetchTransactions(userData.response.correo)
+        fetchCardsForTokens(userData.response.correo)
+        router.replace(`/(tabs)/`);
+        
       } else {
         setErrorSession('Please check your email and password, or try again later.');
       }
@@ -120,6 +133,59 @@ export const Login = () => {
       setErrorSession('Please check your email and password, or try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCardsForTokens = async (correo:string) => {
+    await useFetch(
+      'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/account/cards/email',
+      { correo },
+      'POST'
+    ).then((data) => {
+      const newCards = data.cuentas.map((card: any) => ({
+        id: card.account_id,
+        balance: card.balances.current,
+        name: card.name,
+        type: card.type,
+        accent: card.accent,
+      }));
+      setCards(newCards);
+    });
+  };
+
+  const fetchTransactions = async (correo:string) => {
+    try {
+      const data = await useFetch(
+        'https://zttizctjsl.execute-api.us-east-1.amazonaws.com/backend/transactions/email',
+        { correo },
+        'POST'
+      );
+  
+      if (data && data.transacciones) {
+        // Formatear las transacciones
+        const formattedTransactions: PlaidTransaction[] = data.transacciones
+          .flat()
+          .map((transaction: any) => ({
+            date: transaction.date,
+            amount: transaction.amount,
+            logo_url: transaction.logo_url,
+            merchant_name: transaction.merchant_name,
+            name: transaction.name,
+            category: Array.isArray(transaction.category) ? transaction.category : [],
+            mainCategory: transaction.mainCategory || "Others",
+          }));
+  
+        console.log(data);
+        console.log(data.transacciones);
+        // Filtrar las transacciones
+        const filteredData = filterTransactions(formattedTransactions);
+        setTransacciones(filteredData);
+      } else {
+        new Error('No se encontraron transacciones')
+      }
+  
+    } catch (error) {
+      console.error('Error al obtener las transacciones:', error);
     }
   };
 
