@@ -530,6 +530,24 @@ export default function ChatScreen() {
             marginVertical: 10,
           }}>
           <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "column", justifyContent: "flex-end" }}>
+              <Pressable
+                onPress={() => console.log("Mic pressed")}
+                disabled={!agentAvailable}
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.3 : 1, borderRadius: 50 },
+                ]}>
+                {agentAvailable ? (
+                  <Ionicons
+                    name="mic-outline"
+                    size={25}
+                    style={{}}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Pressable>
+            </View>
             <TextInput
               ref={textInputRef}
               value={inputValue}
