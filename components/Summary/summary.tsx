@@ -18,6 +18,7 @@ import {
   DMSans_700Bold,
   DMSans_700Bold_Italic,
 } from "@expo-google-fonts/dm-sans";
+import Header from "../Header";
 
 export default function Analisis() {
   const { width } = Dimensions.get("window");
@@ -164,7 +165,8 @@ export default function Analisis() {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
+      <Header title="Analysis" />
       <View style={styles.arcContainer}>
         <ArcComponent
           segments={segments}
@@ -178,7 +180,7 @@ export default function Analisis() {
       <View style={styles.parametersContainer}>
         <ParameterList parameters={parameters} />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
