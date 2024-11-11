@@ -66,26 +66,26 @@ const Slides: React.FC<AutoSliderProps> = ({
   >(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:5001/recommend", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            accessToken: "access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a",
-          }),
-        });
-        const result: ApiResponse = await response.json();
-        console.log(result);
-        setRecommendationData(result.response);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+    // const fetchData = async () => {
+    //   try {
+    //     const response = await fetch("http://127.0.0.1:5001/recommend", {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         accessToken: "access-sandbox-afd1b0a9-36eb-4a0b-8173-acdcbb1b0c0a",
+    //       }),
+    //     });
+    //     const result: ApiResponse = await response.json();
+    //     console.log(result);
+    //     setRecommendationData(result.response);
+    //   } catch (error) {
+    //     console.error("Error fetching data:", error);
+    //   }
+    // };
 
-    fetchData();
+    // fetchData();
   }, []);
 
   const defaultSlides: Slide[] = [

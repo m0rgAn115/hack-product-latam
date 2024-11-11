@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { View, Text, FlatList, StyleSheet, Image, Pressable } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+interface Transaction {
+  name: string;
+  amount: number;
+  date: string;
+  logo_url?: string;
+  merchant_name?: string;
+}
 
 interface ComponentProps {
   category: string;
-  transactions: Array<{
-    name: string;
-    amount: number;
-    date: string;
-    logo_url?: string;
-    merchant_name?: string;
-  }>; 
+  transactions: Transaction[];
   onPress: () => void;
   color: string; // Color específico para la categoría
 }
@@ -23,116 +24,138 @@ export const categoryColors = {
   Utilities: "#73D8B1",
 };
 
+const renderCategoryEmoji = (category: string) => {
+  switch (category) {
+    case 'Food and Drink':
+      return "🍏";  // O "🍔" o "🍜"
+    case 'Entertainment':
+      return "🎬";  // O "🎮"
+    case 'Shopping':
+      return "🛒";  // O "👗"
+    case 'Utilities':
+      return "💡";  // O "🔧"
+    default:
+      return "🌍";  // O "🌍"
+  }
+};
 
 const CategoryCard = ({ category, transactions, onPress, color }: ComponentProps) => {
+
   const totalCategory = transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const formatAmount = (amount: number) => `$${Math.abs(amount).toFixed(2)}`;
+
+  const renderTransactionItem = ({ item }: { item: Transaction }) => {
+    return (
+      <View style={styles.transactionContainer}>
+        <View style={styles.transactionDetails}>
+          <View style={[styles.iconLogo]}>
+            {item.logo_url ? (
+              <Image source={{ uri: item.logo_url }} style={styles.logoImage} resizeMode="contain" />
+            ) : (
+              <Text style={styles.logoNone}>{renderCategoryEmoji(category)}</Text>
+            )}
+          </View>
+          <View>
+            <Text style={styles.transactionTitle}
+              numberOfLines={1}
+              ellipsizeMode= 'tail' 
+            >{item.name}</Text>
+            <Text style={styles.transactionDate}>{item.date}</Text>
+          </View>
+        </View>
+        <View style={styles.progressBarContainer}>
+          <Text style={styles.transactionAmount}>
+            {item.amount < 0 && '-'}{formatAmount(item.amount)}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
     <GestureHandlerRootView>
-      <TouchableOpacity onPress={onPress}>
+      <Pressable onPress={onPress} style={({ pressed }) => [styles.pressableContainer, pressed && styles.pressed]}>
         <View style={styles.categoryContainer}>
           <View style={styles.header}>
-            <View style={[styles.icon, { backgroundColor: color }]} />
+            <View style={[styles.iconCont,{ backgroundColor: color }]}>
+              <Text style={styles.icon}>{renderCategoryEmoji(category)}</Text>
+            </View>
             <Text style={styles.categoryTitle}>{category}</Text>
-            <Text style={styles.categoryTotal}>${totalCategory.toFixed(2)}</Text>
+            <Text style={styles.categoryTotal}>{formatAmount(totalCategory)}</Text>
           </View>
           <FlatList
-            data={transactions.slice(0, 3)} // Limitar a las primeras 2 transacciones
+            data={transactions.slice(0, 3)} // Limitar a las primeras 3 transacciones
             keyExtractor={(transaction, index) => `${transaction.name}-${transaction.date}-${index}`}
-            renderItem={({ item }) => {
-              const percentage = (Math.abs(item.amount) / totalCategory) * 100;
-              return (
-                <View style={styles.transactionContainer}>
-                  <View style={styles.transactionDetails}>
-                    <View style={[styles.iconLogo]}>
-                      {
-                        item.logo_url ? (
-                          <Image source={{uri: item.logo_url}}
-                            style={styles.logoImage}
-                            resizeMode="contain" // Opcional: ajusta cómo se escala la imagen
-                            accessibilityLabel={item.name}
-                        />
-                        ) : (
-                          <View style={[styles.logoNone, {backgroundColor: color}]} />
-                        )
-                      }
-                    </View>
-                    <View>
-                      <Text style={styles.transactionTitle}>{item.name}</Text>
-                      <Text style={styles.transactionDate}>{item.date}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.progressBarContainer}>
-                    <Text style={styles.transactionAmount}>{item.amount < 0 && '-'}${Math.abs(item.amount).toFixed(2)}</Text>
-                  </View>
-                </View>
-              );
-            }}
+            renderItem={renderTransactionItem}
           />
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
-  categoryContainer: { 
+  pressableContainer: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  pressed: {
+    opacity: 0.6,
+  },
+  categoryContainer: {
     marginVertical: 10,
-    marginHorizontal: 30,
-    paddingHorizontal: 15,
     backgroundColor: '#FFFFFF',
-    borderRadius: 20, // Bordes redondeados
+    borderRadius: 14,
     padding: 15,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    elevation: 2,
+    borderColor: '#EFEFF1',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
+  },
+  iconCont: {
+    marginRight: 10,
+    borderRadius: 5,
   },
   icon: {
-    width: 12,
-    height: 12,
-    borderRadius: 12,
-    marginRight: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    fontSize: 16,
   },
   iconLogo: {
-    elevation: 2,
-    borderRadius: 100,
-    marginRight: 10,
-    
+    marginRight: 15,
   },
   categoryTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'light',
     color: '#4F4F4F',
     flex: 1,
   },
   categoryTotal: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'medium',
     color: '#4F4F4F',
   },
   transactionContainer: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    marginBottom: 10,
+    marginBottom: 14,
   },
   transactionDetails: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 15,
+    flex: 1,
   },
   transactionTitle: {
     fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: '600',
   },
   transactionAmount: {
     fontSize: 14.5,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: '600',
   },
   transactionDate: {
     fontSize: 12,
@@ -142,29 +165,16 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
   },
-  progressBarBackground: {
-    backgroundColor: '#E0E0E0',
-    borderRadius: 2,
-    flex: 1,
-  },
-  progressBar: {
-    height: 4,
-    borderRadius: 2,
-  },
   logoImage: {
-    width: 26, 
+    width: 26,
     height: 26,
-    borderRadius: 20, 
   },
   logoNone: {
-    width: 16,
-    marginHorizontal: 5,
-    height: 2,
+    width: 26,
+    height: 26,
+    textAlign: 'center',
+    textAlignVertical: 'center',
   },
-  transactValue: {
-    fontSize: 12,
-    color: '#A0A0A0',
-  }
 });
 
 export default CategoryCard;

@@ -4,29 +4,13 @@ import Header from "@/components/home/Header";
 import Cards from "@/components/home/Cards";
 import Balance from "@/components/home/Balance";
 import Slides from "@/components/home/Slides";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScrollView, View } from "react-native";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import CategoryDetailScreen from "@/components/Expenses/CategoryDetailScreen";
 import SubscriptionsCard from "@/components/Expenses/SubscriptionsCard";
 import Analisis from "@/components/Summary/summary";
 
 export default function HomeScreen() {
-  async function getToken() {
-    try {
-      const sesion_token = await AsyncStorage.getItem("session_token");
-      const refresh_token = await AsyncStorage.getItem("refresh_token");
-      const token_type = await AsyncStorage.getItem("token_type");
-      console.log(sesion_token, refresh_token, token_type);
-    } catch (error) {
-      console.error("Error al recuperar el token:", error);
-    }
-  }
-
-  const handleRecuperarToken = () => {
-    // getSessionToken().then(t => console.log('token:', t))
-  };
 
   type RootStackParamList = {
     Home: undefined;
@@ -44,8 +28,6 @@ export default function HomeScreen() {
     subscriptions: undefined;
     onPress: () => void;
   };
-
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const Stack = createStackNavigator<RootStackParamList>();
 

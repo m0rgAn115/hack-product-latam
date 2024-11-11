@@ -1,5 +1,4 @@
 import useFetch from "@/hooks/useFetch";
-import useGetTokens from "@/hooks/useGetTokens";
 import { useUserStore } from "@/store/useUserStore";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -10,7 +9,6 @@ import {
   Dimensions,
   Text,
   TouchableOpacity,
-  TextInput,
   Platform,
 } from "react-native";
 
@@ -95,10 +93,6 @@ const Cards = () => {
         </View>
       </View>
     );
-  };
-
-  const addNewCard = () => {
-    // Lógica para añadir una nueva tarjeta (si es necesario)
   };
 
   return (

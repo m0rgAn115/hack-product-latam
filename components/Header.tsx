@@ -5,9 +5,10 @@ import { useRouter } from 'expo-router';
 
 interface HeaderProps {
   title: string;
+  onPress?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ title }) => {
+const Header: React.FC<HeaderProps> = ({ title, onPress }) => {
   const router = useRouter();
 
   // Función para regresar
@@ -15,9 +16,11 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     router.back();
   };
 
+  const handlePress = onPress || handleBack;
+
   return (
     <View style={styles.header}>
-      <Pressable onPress={handleBack} style={styles.backButton}>
+      <Pressable style={styles.backButton} onPress={handlePress}>  
         <Ionicons name="chevron-back-outline" size={30} color="black" />
       </Pressable>
       <Text style={styles.title}>{title}</Text>
