@@ -69,8 +69,8 @@ export const Login = () => {
 
   const setDemoUser = async () => {
     setLoadingUse(true);
-    setEmailValue('damianmor3005@gmail.com');
-    setPassValue('Moar758849@');
+    setEmailValue('damianmor3005@hotmail.com');
+    setPassValue('hackproductlatam2024');
     setLoadingUse(false);
   };
 
