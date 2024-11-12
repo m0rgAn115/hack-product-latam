@@ -379,7 +379,7 @@ export default function ChatScreen() {
       clearChat()
 
     const userMsg = inputValue;
-    const userInput = userMsg.toLowerCase();
+    const userInput = userMsg;
 
     // Update conversation first
     setConversation((prev) => [
@@ -619,11 +619,11 @@ const ChatItem = ({
         <View
           style={{
             flexDirection: "row",
-            paddingHorizontal: 10,
-            paddingVertical: 18,
+            paddingHorizontal: 14,
+            paddingVertical: 14,
             borderRadius: 20,
           }}>
-          <View style={{ marginRight: 10 }}>
+          <View style={{ marginRight: 14 }}>
             <View
               style={{
                 width: 35,
@@ -647,13 +647,13 @@ const ChatItem = ({
       ) : (
         <View
           style={{
-            backgroundColor: "#ececec",
+            backgroundColor: "#FAFAFA",
             flexDirection: "row",
-            paddingHorizontal: 18,
+            paddingHorizontal: 14,
             paddingVertical: 14,
-            borderRadius: 20,
+            borderRadius: 14,
           }}>
-          <View style={{ marginRight: 10 }}>
+          <View style={{ marginRight: 14 }}>
             <View
               style={{
                 width: 35,
