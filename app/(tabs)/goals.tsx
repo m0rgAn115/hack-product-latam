@@ -51,7 +51,7 @@ export default function TabTwoScreen() {
     };
 
     fetchGoalsData();
-  }, [isFocused]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

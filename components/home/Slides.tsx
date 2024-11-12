@@ -1336,7 +1336,7 @@ const Slides: React.FC<AutoSliderProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 25,
+    paddingVertical: 10,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
