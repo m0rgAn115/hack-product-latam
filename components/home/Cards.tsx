@@ -86,8 +86,6 @@ const Cards = () => {
     );
   };
 
-  console.log("hola", cards.length);
-
   return (
     <>
       <View style={styles.container}>
@@ -126,12 +124,12 @@ const Cards = () => {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 5,
     backgroundColor: "#fff",
-    marginBottom: 10,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingVertical: 10,
   },
   cardContainer: {
     marginRight: 20,
